@@ -1,7 +1,7 @@
-// geometry2/pawmo-tuft.js
+// geometry2/pawmo-torso.js (Versi Upgrade dengan Normal)
 import { getBezierPoint, getBezierTangent } from "./bezier.js"; // Pastikan tangent di-impor
 
-export class pawmoTuft {
+export class pawmoTorso {
     // ▼▼▼ DIUBAH: Tambahkan _normal ▼▼▼
     constructor(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, opts = {}) {
         this.GL = GL; this.SHADER_PROGRAM = SHADER_PROGRAM;
@@ -15,14 +15,14 @@ export class pawmoTuft {
 
     _build(opts) {
         const color = opts.color ?? [1, 1, 1];
-        const segments = opts.segments ?? 24;
-        const rings = opts.rings ?? 24;
+        const segments = opts.segments ?? 48;
+        const rings = opts.rings ?? 48;
 
         // Titik Bézier Anda (tetap sama)
-        const p0 = [0.3, -0.375];
-        const p1 = [0.75, 0.15];
-        const p2 = [0.075, 0.675];
-        const p3 = [0.0, 0.825];
+        const p0 = [0.0, -1.6];
+        const p1 = [2.2, -1.6];
+        const p2 = [1.6, 1.8];
+        const p3 = [0.0, 1.7];
 
         const vertices = [], faces = [];
 
@@ -76,7 +76,7 @@ export class pawmoTuft {
         this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array(this.vertex), this.GL.STATIC_DRAW);
         this.OBJECT_FACES=this.GL.createBuffer(); this.GL.bindBuffer(this.GL.ELEMENT_ARRAY_BUFFER, this.OBJECT_FACES);
         this.GL.bufferData(this.GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.faces), this.GL.STATIC_DRAW);
-        // this.childs.forEach(c => c.setup()); // Tuft tidak punya anak
+        // this.childs.forEach(c => c.setup()); // Torso ini tidak punya anak
     }
     // Render() akan di-patch oleh pawmo.js
     render(PARENT_MATRIX) { /* ... This will be patched ... */ }
