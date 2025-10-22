@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cherry Blossom Trees ft. Pawmi, Pawmo, Pawmot</title>
+    <style>
+        /* CSS Anda tetap sama */
+        body { margin: 0; overflow: hidden; background: linear-gradient(to bottom, #87CEEB 0%, #E8A87C 100%); font-family: Arial, sans-serif; }
+        canvas { display: block; image-rendering: crisp-edges; image-rendering: -moz-crisp-edges; image-rendering: pixelated; }
+        #controls { position: absolute; top: 20px; left: 20px; color: white; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 10px; font-size: 14px; }
+        #controls div { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <canvas id="glCanvas"></canvas>
+
+    <div id="controls">
+        <div><strong>Controls:</strong></div>
+        <div>Click to Lock Mouse</div>
+        <div>WASD : Move</div>
+        <div>Mouse : Look Around</div>
+        <div>Space/Shift : Up/Down</div>
+    </div>
+
+    <script src="libs.js"></script>
+
+    <script type="module" src="main-scene.js"></script>
+</body>
+</html>
