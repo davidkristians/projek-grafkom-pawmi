@@ -27,6 +27,7 @@ export class TreeGroup extends group {
         const trunk = new TrunkNode(_Mmatrix, _normal, env);
         const canopy = new CanopyNode(_Mmatrix, _normal, env);
         const branches = new BranchesNode(_Mmatrix, _normal, env);
+        LIBS.translateY(canopy.POSITION_MATRIX, 0.3);
 
         this.childs.push(trunk);
         this.childs.push(canopy);
