@@ -36,7 +36,8 @@ export class pawmotHead extends group {
         const tuftLeft2 = new pawmotTuft(GL, SHADER_PROGRAM, _position, _color, _normal, _Mmatrix, { color: PAWMO_ORANGE });
         const tuftRight1 = new pawmotTuft(GL, SHADER_PROGRAM, _position, _color, _normal, _Mmatrix, { color: PAWMO_ORANGE });
         const tuftRight2 = new pawmotTuft(GL, SHADER_PROGRAM, _position, _color, _normal, _Mmatrix, { color: PAWMO_ORANGE });
-        
+        const tuftGroup = new group(_Mmatrix, _normal);
+
         LIBS.set_I4(muzzle.POSITION_MATRIX); LIBS.translateZ(muzzle.POSITION_MATRIX, 1); LIBS.translateY(muzzle.POSITION_MATRIX, -0.2); LIBS.rotateX(muzzle.POSITION_MATRIX, LIBS.degToRad(13));
         LIBS.set_I4(nose.POSITION_MATRIX); LIBS.translateZ(nose.POSITION_MATRIX, 1.1); LIBS.translateY(nose.POSITION_MATRIX, 0.01);
         LIBS.set_I4(leftEye.POSITION_MATRIX); LIBS.translateX(leftEye.POSITION_MATRIX, -0.4); LIBS.translateY(leftEye.POSITION_MATRIX, 0.2); LIBS.translateZ(leftEye.POSITION_MATRIX, 0.9);
@@ -58,15 +59,18 @@ export class pawmotHead extends group {
         LIBS.set_I4(tuftLeft2.POSITION_MATRIX); LIBS.translateX(tuftLeft2.POSITION_MATRIX, -0.5); LIBS.translateY(tuftLeft2.POSITION_MATRIX, 1); LIBS.translateZ(tuftLeft2.POSITION_MATRIX, 0.9); LIBS.rotateZ(tuftLeft2.POSITION_MATRIX, LIBS.degToRad(45)); LIBS.rotateY(tuftLeft2.POSITION_MATRIX, LIBS.degToRad(-15)); LIBS.scale(tuftLeft2.POSITION_MATRIX, 0.8, 0.8, 0.8);
         LIBS.set_I4(tuftRight2.POSITION_MATRIX); LIBS.translateX(tuftRight2.POSITION_MATRIX, 0.5); LIBS.translateY(tuftRight2.POSITION_MATRIX, 1); LIBS.translateZ(tuftRight2.POSITION_MATRIX, 0.9); LIBS.rotateZ(tuftRight2.POSITION_MATRIX, LIBS.degToRad(-45)); LIBS.rotateY(tuftRight2.POSITION_MATRIX, LIBS.degToRad(15)); LIBS.scale(tuftRight2.POSITION_MATRIX, 0.8, 0.8, 0.8);
 
+        tuftGroup.childs.push(tuftCenter, tuftLeft1, tuftRight1, tuftLeft2, tuftRight2);
+
         this.childs.push(
             baseHead, muzzle, nose, leftEye, rightEye, mouthOpen, 
             leftCheek, rightCheek, leftEyepupil, rightEyepupil,
             leftEar, rightEar, leftInnerEar, rightInnerEar,
             leftEarBulb, rightEarBulb,
-            tuftCenter, tuftLeft1, tuftRight1, tuftLeft2, tuftRight2
+            tuftGroup
         );
 
         // ▼▼▼ PERBAIKAN: Buat smileRef untuk kompatibilitas animasi ▼▼▼
         this.smileRef = mouthOpen;
+        this.tuftRef = tuftGroup;
     }
 }
