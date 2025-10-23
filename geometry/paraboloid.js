@@ -1,5 +1,3 @@
-// geometry/paraboloid.js
-
 export class paraboloid {
     constructor(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, opts = {}) {
         this.GL = GL; this.SHADER_PROGRAM = SHADER_PROGRAM;
@@ -9,8 +7,8 @@ export class paraboloid {
         this.MOVE_MATRIX = LIBS.get_I4();
         this.childs = [];
 
-        // rx: radius di sumbu X, rz: radius di sumbu Z
-        // height: ketinggian paraboloid di sumbu Y
+        // rx: radius sumbu X, rz: radius sumbu Z
+        // height: ketinggian paraboloid sumbu Y
         const rx = opts.rx ?? 1.0;
         const rz = opts.rz ?? 1.0;
         const height = opts.height ?? 1.0; 
@@ -34,11 +32,9 @@ export class paraboloid {
                 const cv = Math.cos(v);
                 const sv = Math.sin(v);
 
-                // ▼▼▼ Rumus Parametrik Elliptic Paraboloid ▼▼▼
                 const x = rx * u * cv;
                 const y = height * u * u; // Kunci: y proporsional dengan u^2
                 const z = rz * u * sv;
-                // ▲▲▲ --------------------------------- ▲▲▲
 
                 vertices.push(x, y, z, ...color);
             }
@@ -66,6 +62,7 @@ export class paraboloid {
         this.GL.bufferData(this.GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.faces), this.GL.STATIC_DRAW);
         this.childs.forEach(c => c.setup());
     }
+    
     render(PARENT_MATRIX) {
         const M = LIBS.get_I4();
         LIBS.mul(M, PARENT_MATRIX, this.POSITION_MATRIX);
