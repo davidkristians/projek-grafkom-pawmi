@@ -1,7 +1,6 @@
 import { group } from "./group.js";
 import { getBezierPoint, getBezierTangent } from "./bezier.js";
 
-// ▼▼▼ DIUBAH: Tambahkan 'export' agar bisa di-patch ▼▼▼
 export class RuffSpike {
     constructor(GL, SHADER_PROGRAM, _position, _color, _normal, _Mmatrix, opts = {}) {
         this.GL = GL; this.SHADER_PROGRAM = SHADER_PROGRAM;
@@ -50,7 +49,7 @@ export class RuffSpike {
         this.OBJECT_FACES=this.GL.createBuffer(); this.GL.bindBuffer(this.GL.ELEMENT_ARRAY_BUFFER, this.OBJECT_FACES);
         this.GL.bufferData(this.GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.faces), this.GL.STATIC_DRAW);
     }
-    render(PARENT_MATRIX) { /* ... This will be patched ... */ }
+    render(PARENT_MATRIX) { }
 }
 
 

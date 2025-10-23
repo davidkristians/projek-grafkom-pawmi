@@ -3,7 +3,6 @@ import { group } from "./group.js";
 import { cone } from "./cone.js";
 import { ellipsoid } from "./ellipsoid.js";
 
-// Kelas internal untuk lengan
 export class PawmoArm extends group {
     constructor(GL, SHADER_PROGRAM, _position, _color, _normal, _Mmatrix, opts = {}) {
         super(_Mmatrix, _normal);
@@ -15,6 +14,7 @@ export class PawmoArm extends group {
         this.childs = [];
         this._build(opts);
     }
+
     _build(opts) {
         const orangeColor = opts.orange, greenColor = opts.green;
         const segments = opts.segments ?? 32, rings = opts.rings ?? 32;
@@ -49,6 +49,7 @@ export class PawmoArm extends group {
         }
         this.vertex = vertices; this.faces = faces;
     }
+
     setup() {
         this.OBJECT_VERTEX = this.GL.createBuffer();
         this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.OBJECT_VERTEX);
@@ -57,10 +58,11 @@ export class PawmoArm extends group {
         this.GL.bindBuffer(this.GL.ELEMENT_ARRAY_BUFFER, this.OBJECT_FACES);
         this.GL.bufferData(this.GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.faces), this.GL.STATIC_DRAW);
     }
-    render(PARENT_MATRIX) { /* ... This will be patched ... */ }
+    
+    render(PARENT_MATRIX) { }
 }
 
-// Kelas utama (group) untuk tangan
+// CLASS UTAMA UNTUK GROUP TANGAN
 export class pawmotHand extends group {
     constructor(GL, SHADER_PROGRAM, _position, _color, _normal, _Mmatrix, opts = {}) {
         super(_Mmatrix, _normal);

@@ -1,11 +1,7 @@
-// geometry3/bezier.js
-
-// Linear interpolation (mix)
 function mix(a, b, t) {
     return a * (1 - t) + b * t;
 }
 
-// Calculates a 2D point on a cubic Bézier curve
 export function getBezierPoint(t, p0, p1, p2, p3) {
     const ab_x = mix(p0[0], p1[0], t);
     const ab_y = mix(p0[1], p1[1], t);
@@ -22,7 +18,7 @@ export function getBezierPoint(t, p0, p1, p2, p3) {
     return { x: final_x, y: final_y };
 }
 
-// Menghitung turunan/garis singgung (tangent) dari kurva Bézier
+// HITUNG-HITUNGAN TURUNAN DAN GARIS SINGGUNG BEZIER
 export function getBezierTangent(t, p0, p1, p2, p3) {
     const dt = 1.0 - t;
     const dt2 = dt * dt;
@@ -31,7 +27,7 @@ export function getBezierTangent(t, p0, p1, p2, p3) {
     const tx = 3 * dt2 * (p1[0] - p0[0]) + 6 * dt * t * (p2[0] - p1[0]) + 3 * t2 * (p3[0] - p2[0]);
     const ty = 3 * dt2 * (p1[1] - p0[1]) + 6 * dt * t * (p2[1] - p1[1]) + 3 * t2 * (p3[1] - p2[1]);
     
-    // Normalisasi tangen agar panjangnya 1 (opsional tapi bagus)
+    // NORMALISASI
     const len = Math.sqrt(tx * tx + ty * ty) || 1;
     return { x: tx / len, y: ty / len };
 }
