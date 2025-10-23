@@ -67,11 +67,11 @@ export function animatePawmi(actor, time, deltaTime) {
     LIBS.scale(actor.POSITION_MATRIX, 0.2, 0.2, 0.2); // scale tetap
 
     // Animasi Ekor
-    if (actor.tailRef) {
-        const tailRotation = Math.sin(time * PAWMI_TAIL_SPEED) * PAWMI_TAIL_AMOUNT;
-        LIBS.set_I4(actor.tailRef.MOVE_MATRIX);
-        LIBS.rotateZ(actor.tailRef.MOVE_MATRIX, tailRotation);
-    }
+        if (actor.tailRef) {
+            const tailRotation = Math.sin(time * PAWMI_TAIL_SPEED) * PAWMI_TAIL_AMOUNT;
+            LIBS.set_I4(actor.tailRef.MOVE_MATRIX);
+            LIBS.rotateZ(actor.tailRef.MOVE_MATRIX, tailRotation);
+        }
 
     // Animasi Mulut
     if (actor.mouthRef) {
