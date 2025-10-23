@@ -388,57 +388,89 @@ export class Environment {
     }
 
     // --- Fungsi Render Utama (Versi Scene Graph + Awan Statis) ---
-    render(viewMatrix, projectionMatrix) {
-        const gl = this.gl;
-        const camera = this.globalApp.camera;
+// env/environment.js
 
-        // 1. Setup Frame
-        gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.clearColor(0.53, 0.81, 0.92, 1.0); gl.clearDepth(1.0);
+    // --- Fungsi Render Utama (Versi Pulau = Awan) ---
+    render(viewMatrix, projectionMatrix) {
+        const gl = this.gl;
+        const camera = this.globalApp.camera;
 
-        // 2. Render Awan (jika program cloud ada dan kamera ada)
-        if (this.cloudProgram && this.cProjectionLocation && this.buffers.cloud && camera) {
-            gl.useProgram(this.cloudProgram);
-            gl.uniformMatrix4fv(this.cProjectionLocation, false, projectionMatrix);
+        // 1. Setup Frame
+        gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.clearColor(0.53, 0.81, 0.92, 1.0); gl.clearDepth(1.0);
 
-            gl.enable(gl.BLEND);
-            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-            gl.depthMask(false);
+        // ▼▼▼ BARU: Ambil matriks 'NoRotation' sekali di atas ▼▼▼
+        // Kita butuh ini untuk Awan dan Pulau
+        const viewMatrixNoRot = camera.getViewMatrixNoRotation();
+        
+        // ▲▲▲ SELESAI ▲▲▲
 
-            // Ambil view matrix TANPA rotasi
-            const viewMatrixNoRot = camera.getViewMatrixNoRotation();
+        // 2. Render Awan (jika program cloud ada dan kamera ada)
+        if (this.cloudProgram && this.cProjectionLocation && this.buffers.cloud && camera) {
+            gl.useProgram(this.cloudProgram);
+            gl.uniformMatrix4fv(this.cProjectionLocation, false, projectionMatrix);
 
-            if (this.globalApp.cloudSystem && this.globalApp.cloudSystem.clouds) {
-                for (const cloudData of this.globalApp.cloudSystem.clouds) {
-                    let cloudMv = LIBS.get_I4();
-                    // Kalikan dengan view matrix TANPA rotasi
-                    LIBS.mul(cloudMv, viewMatrixNoRot, cloudMv);
-                    // Terapkan transformasi lokal awan
-                    LIBS.translateX(cloudMv, cloudData.x);
-                    LIBS.translateY(cloudMv, cloudData.y);
-                    LIBS.translateZ(cloudMv, cloudData.z);
-                    LIBS.rotateY(cloudMv, cloudData.rotY);
-                    LIBS.scale(cloudMv, cloudData.size, cloudData.size * 0.6, cloudData.size * 0.9);
-                    this._drawCloud(this.buffers.cloud, cloudMv);
-                }
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+            gl.depthMask(false);
+
+            // (viewMatrixNoRot sudah diambil di atas)
+
+            if (this.globalApp.cloudSystem && this.globalApp.cloudSystem.clouds) {
+                for (const cloudData of this.globalApp.cloudSystem.clouds) {
+                    let cloudMv = LIBS.get_I4();
+                    // Kalikan dengan view matrix TANPA rotasi
+                    LIBS.mul(cloudMv, viewMatrixNoRot, cloudMv);
+                    // Terapkan transformasi lokal awan
+                    LIBS.translateX(cloudMv, cloudData.x);
+                    LIBS.translateY(cloudMv, cloudData.y);
+                    LIBS.translateZ(cloudMv, cloudData.z);
+                    LIBS.rotateY(cloudMv, cloudData.rotY);
+                    LIBS.scale(cloudMv, cloudData.size, cloudData.size * 0.6, cloudData.size * 0.9);
+                    this._drawCloud(this.buffers.cloud, cloudMv);
+                }
+            }
+
+            gl.depthMask(true);
+            gl.disable(gl.BLEND);
+        }
+
+        // 3. Render Scene Graph & Pulau
+        if (this.mainProgram && this.globalApp.projLoc && this.globalApp.actors) {
+            gl.useProgram(this.mainProgram);
+            gl.uniformMatrix4fv(this.globalApp.projLoc, false, projectionMatrix);
+
+            // ▼▼▼ BARU: Bagian 3.1 - Render Pulau (seperti awan) ▼▼▼
+            // Kita render pulau-pulau di sini secara manual, menggunakan
+            // data posisi dari 'this.globalApp.islandPositions'
+            // dan matriks 'viewMatrixNoRot'.
+            if (this.globalApp.islandPositions && this.buffers.island) {
+                // for (const pos of this.globalApp.islandPositions) {
+                //     let islandMv = LIBS.get_I4();
+                    
+                //     // Kalikan dengan view matrix TANPA rotasi (LOGIKA AWAN)
+                //     LIBS.mul(islandMv, viewMatrixNoRot, islandMv);
+                    
+                //     // Terapkan transformasi lokal (posisi)
+                //     LIBS.translateX(islandMv, pos[0]);
+                //     LIBS.translateY(islandMv, pos[1]);
+                //     LIBS.translateZ(islandMv, pos[2]);
+                    
+                //     // Gambar pulau menggunakan draw function yang normal (bukan _drawCloud)
+                //     this._drawObject(this.buffers.island, islandMv);
+                // }
             }
+            // ▲▲▲ SELESAI ▲▲▲
 
-            gl.depthMask(true);
-            gl.disable(gl.BLEND);
-        }
-
-        // 3. Render Scene Graph (jika program utama ada)
-        if (this.mainProgram && this.globalApp.projLoc && this.globalApp.actors) {
-            gl.useProgram(this.mainProgram);
-            gl.uniformMatrix4fv(this.globalApp.projLoc, false, projectionMatrix);
-
-            // Render scene graph menggunakan viewMatrix BIASA
-            for (const actor of this.globalApp.actors) {
-                actor.render(viewMatrix);
-            }
-        }
-    }
+            // ▼▼▼ DIUBAH: Bagian 3.2 - Render Sisa Scene Graph (Pohon, Batu, Pawmi, dll) ▼▼▼
+            // Render scene graph menggunakan viewMatrix BIASA (DENGAN rotasi)
+            // PENTING: Pastikan 'IslandNode' tidak ada lagi di dalam 'this.globalApp.actors'
+            for (const actor of this.globalApp.actors) {
+                actor.render(viewMatrix);
+            }
+        }
+    }
 
     // --- Fungsi Helper Draw ---
     _drawCloud(bufferSet, modelViewMatrix) {

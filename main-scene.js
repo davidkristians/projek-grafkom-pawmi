@@ -1,12 +1,10 @@
-// main-scene.js
+// main-scene.js (BERSIH - Hanya mengontrol Kamera)
 
 // Import sistem utama
 import { Environment } from './env/environment.js';
 import { Camera } from './env/camera.js';
 import { AnimationLoop } from './env/animation.js';
-
-// ▼▼▼ BARU: Import node scene kita ▼▼▼
-import { IslandNode } from './scene/IslandNode.js'; 
+import { IslandNode } from './scene/IslandNode.js';
 
 // Impor fungsi create untuk semua aktor
 import { createPawmi } from './actors/pawmi.js';
@@ -15,83 +13,129 @@ import { createPawmot } from './actors/pawmot.js';
 
 // 1. Buat jembatan global
 const globalApp = {
-    gl: null,
-    mainProgram: null,
-    cloudProgram: null,
-    posLoc: null,       // aPosition
-    colLoc: null,       // aColor
-    normLoc: null,      // aNormal
-    mvLoc: null,        // uModelViewMatrix
-    projLoc: null,    // uProjectionMatrix
-    normMatLoc: null, // uNormalMatrix
-    actors: [], // <-- Daftar ini sekarang akan berisi IslandNode
-    islandPositions: [[-6, 0, 0], [0, 0, 0], [6, 0, 0]], // Tetap sebagai data
-    camera: null
+    gl: null,
+    mainProgram: null,
+    cloudProgram: null,
+    skyboxProgram: null, // Referensi program skybox
+    posLoc: -1,
+    colLoc: -1,
+    normLoc: -1,
+    texCoordLoc: -1, // Lokasi UV (meskipun tidak dipakai di sini)
+    mvLoc: null,
+    projLoc: null,
+    normMatLoc: null,
+    samplerLoc: null, // Lokasi sampler (meskipun tidak dipakai di sini)
+    timeLoc: null, // Lokasi waktu (meskipun tidak dipakai di sini)
+    useTextureLoc: null, // Flag tekstur (meskipun tidak dipakai di sini)
+    useVertexColorLoc: null, // Flag warna vertex (meskipun tidak dipakai di sini)
+    actors: [], // Berisi IslandNodes
+    islandPositions: [[-6, 0, 0], [0, 0, 0], [6, 0, 0]],
+    camera: null,
+    currentTime: 0 // Waktu global untuk animasi shader (jika ada)
 };
 window.myApp = globalApp;
 
 // 2. Inisialisasi sistem utama
 const env = new Environment('glCanvas', globalApp);
-const camera = new Camera(globalApp);
-const animation = new AnimationLoop(globalApp); 
-globalApp.camera = camera; 
+const camera = new Camera(globalApp); // Kamera menangani input mouse/keyboard
+const animation = new AnimationLoop(globalApp);
+globalApp.camera = camera;
 
-// 3. Setup panggung
-env.setup(); // Ini hanya setup buffer & shader
-camera.updateProjectionMatrix(); 
+// 3. Fungsi Asinkron untuk Setup Panggung dan Aktor
+async function initializeScene() {
+    console.log("Initializing scene...");
+    await env.setup(); // Tunggu environment (shaders, buffers, textures) siap
+    console.log("Environment setup complete.");
 
-// 4. ▼▼▼ LOGIKA PERAKITAN SCENE BARU ▼▼▼
-    
-// Daftar fungsi untuk membuat aktor
-const actorCreateFuncs = [createPawmi, createPawmo, createPawmot];
-// Posisi pulau dari global
-const islandPositions = globalApp.islandPositions;
+    if (!globalApp.mainProgram) {
+        console.error("Setup failed, main shader program not initialized.");
+        return; // Hentikan jika shader gagal
+    }
+    camera.updateProjectionMatrix(); // Set matriks proyeksi awal
 
-// Atur rotasi Y untuk setiap pulau di sini
-// Ubah angka-angka ini untuk memutar pulau sesuai keinginan Anda!
-const islandRotationsY = [
-    LIBS.degToRad(0),  // Pulau kiri (Pawmi)
-    LIBS.degToRad(0),  // Pulau tengah (Pawmo)
-    LIBS.degToRad(0)   // Pulau kanan (Pawmot)
-];
+    // 4. Perakitan Scene Graph (IslandNode + Actors)
+    console.log("Assembling scene graph...");
+    const actorCreateFuncs = [createPawmi, createPawmo, createPawmot];
+    const islandPositions = globalApp.islandPositions;
+    const islandRotationsY = [LIBS.degToRad(0), LIBS.degToRad(0), LIBS.degToRad(0)];
 
-for (let i = 0; i < 3; i++) {
-    // 1. Buat Scene Node "Induk" untuk pulau
-    //    Kita berikan 'env' agar ia bisa mengakses buffers dan _drawObject
-    const islandNode = new IslandNode(globalApp.mvLoc, globalApp.normMatLoc, env);
+    for (let i = 0; i < 3; i++) {
+        if (!env || !globalApp.mvLoc || !globalApp.normMatLoc) {
+            console.error("Environment or shader locations not ready for IslandNode creation.");
+            continue;
+        }
+        console.log(`Creating IslandNode ${i}...`);
+        const islandNode = new IslandNode(globalApp.mvLoc, globalApp.normMatLoc, env);
 
-    // 2. Atur posisi & rotasi DUNIA untuk islandNode
-    LIBS.set_I4(islandNode.POSITION_MATRIX);
-    LIBS.translateX(islandNode.POSITION_MATRIX, islandPositions[i][0]);
-    LIBS.translateY(islandNode.POSITION_MATRIX, islandPositions[i][1]);
-    LIBS.translateZ(islandNode.POSITION_MATRIX, islandPositions[i][2]);
-    LIBS.rotateY(islandNode.POSITION_MATRIX, islandRotationsY[i]); // <-- INI ROTASI INDUKNYA
+        // Atur posisi & rotasi pulau di dunia
+        LIBS.set_I4(islandNode.POSITION_MATRIX);
+        LIBS.translateX(islandNode.POSITION_MATRIX, islandPositions[i][0]);
+        LIBS.translateY(islandNode.POSITION_MATRIX, islandPositions[i][1]);
+        LIBS.translateZ(islandNode.POSITION_MATRIX, islandPositions[i][2]);
+        LIBS.rotateY(islandNode.POSITION_MATRIX, islandRotationsY[i]);
+        const pitchAngle = LIBS.degToRad(15); // Ubah -10 sesuai keinginan
+        LIBS.rotateX(islandNode.POSITION_MATRIX, pitchAngle);
 
-    // 3. Buat aktor (pokemon) untuk pulau ini
-    //    Fungsi create[Aktor] sekarang me-return rig-nya
-    const actorRig = actorCreateFuncs[i](animation); 
-    //    (actorRig.POSITION_MATRIX sudah diatur ke offset LOKAL)
+        // Buat aktor untuk pulau ini
+        console.log(`Creating Actor ${i}...`);
+        const actorRig = actorCreateFuncs[i](animation);
+        if (actorRig) {
+            islandNode.childs.push(actorRig); // Jadikan aktor anak dari pulau
+             console.log(`Actor ${i} added to IslandNode ${i}.`);
+        } else {
+             console.warn(`Failed to create actor ${i}.`);
+        }
 
-    // 4. Jadikan aktor sebagai "anak" dari islandNode
-    islandNode.childs.push(actorRig);
+        globalApp.actors.push(islandNode); // Tambahkan node pulau ke daftar render
+    }
+    console.log("Scene graph assembled.");
 
-    // 5. Tambahkan "induk" (islandNode) ke daftar render utama
-    globalApp.actors.push(islandNode);
+    // 5. Mulai Render Loop setelah semua siap
+    requestAnimationFrame(mainRenderLoop);
+    console.log("Starting render loop.");
 }
 
-// 5. Jalankan Render Loop Utama (Tidak berubah)
+
+// --- Pastikan TIDAK ADA sisa kode event listener mouse di sini ---
+// HAPUS SEMUA INI JIKA MASIH ADA:
+// let THETA=0,PHI=0,drag=false,x_prev=0,y_prev=0;
+// const mouseDown=...
+// const mouseUp=...
+// const mouseMove=...
+// const mouseWheel=...
+// CANVAS.addEventListener("mousedown",...);
+// CANVAS.addEventListener("mouseup",...);
+// CANVAS.addEventListener("mouseout",...);
+// CANVAS.addEventListener("mousemove",...);
+// CANVAS.addEventListener("wheel",...);
+// -----------------------------------------------------------------
+
+// 6. Jalankan Render Loop Utama
 let lastTime = 0;
 function mainRenderLoop(time) {
-    time *= 0.001;
-    const deltaTime = time - lastTime;
-    lastTime = time;
+    time *= 0.001; // ke detik
+    const deltaTime = Math.min(time - lastTime, 0.1); // Batasi deltaTime
+    lastTime = time;
+    globalApp.currentTime = time; // Update waktu global
 
-    animation.update(time, deltaTime);
-    camera.update(deltaTime); 
-    env.render(camera.getViewMatrix(), camera.getProjectionMatrix());
+    // Update state animasi dan input kamera
+    animation.update(time, deltaTime);
+    camera.update(deltaTime); // Kamera menghitung viewMatrix BARU berdasarkan input
 
-    requestAnimationFrame(mainRenderLoop);
+    // Dapatkan matriks terbaru LANGSUNG dari kamera
+    const currentViewMatrix = camera.getViewMatrix();
+    const currentProjMatrix = camera.getProjectionMatrix();
+
+    // Render seluruh scene menggunakan matriks dari kamera
+    // Pastikan env.render() menggunakan viewMatrix ini dan TIDAK ada
+    // rotasi tambahan yang diterapkan ke 'actors' (IslandNode) di sini.
+    env.render(currentViewMatrix, currentProjMatrix);
+
+    requestAnimationFrame(mainRenderLoop);
 }
 
-// Mulai loop!
-requestAnimationFrame(mainRenderLoop);
+// Panggil fungsi inisialisasi async untuk memulai
+initializeScene().catch(error => {
+    console.error("Initialization failed:", error);
+});
+

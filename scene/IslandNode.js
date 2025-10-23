@@ -18,7 +18,7 @@ export class IslandNode extends group {
 
         // Transformasi lokal untuk geometri pulau
         this.ISLAND_GEOMETRY_MATRIX = LIBS.get_I4();
-        LIBS.translateY(this.ISLAND_GEOMETRY_MATRIX, -0.05);
+        LIBS.translateY(this.ISLAND_GEOMETRY_MATRIX, 0);
         LIBS.rotateX(this.ISLAND_GEOMETRY_MATRIX, -0.28);
 
         // --- Buat Anak Opaque (yang menggunakan mainProgram) ---
@@ -58,7 +58,6 @@ export class IslandNode extends group {
         // Putar agar menghadap ke atas
         LIBS.rotateX(this.waterSource.POSITION_MATRIX, LIBS.degToRad(0));
 
-        // 5. Buat Aliran Air Terjun di bawah
         // ...
         // 5. Buat Aliran Air Terjun di bawah
         this.waterStream = new WaterfallStream(this.gl, wProg, wPos, wCol, wNorm, wMv, wTime);
@@ -71,47 +70,58 @@ export class IslandNode extends group {
         // ...
     }
 
-    render(PARENT_MATRIX) {
-        // Hitung matriks model untuk seluruh pulau
-        const M = LIBS.get_I4();
-        LIBS.mul(M, PARENT_MATRIX, this.POSITION_MATRIX);
-        LIBS.mul(M, M, this.MOVE_MATRIX);
+ // actors/IslandNode.js
 
-        // --- 1. RENDER SEMUA OBJEK OPAQUE (Pulau, Rumput, Pohon, dll) ---
-        if (!this.app.mainProgram) return; // Keluar jika shader utama gagal
-        this.gl.useProgram(this.app.mainProgram);
+    render(PARENT_MATRIX) { // PARENT_MATRIX di sini SEBENARNYA tidak terpakai lagi,
+                             // tapi kita biarkan agar struktur panggilan tetap sama.
+        // --- 1. Hitung Matriks Model-View TANPA Rotasi Kamera ---
+        // Ambil view matrix TANPA rotasi langsung dari kamera
+        const viewMatrixNoRot = this.app.camera.getViewMatrixNoRotation();
 
-        // Gambar geometri dasar pulau
-        let islandMv = LIBS.get_I4();
-        LIBS.mul(islandMv, M, this.ISLAND_GEOMETRY_MATRIX);
-        this.env._drawObject(this.buffers.island, islandMv);
+        // Hitung matriks Model-View TANPA ROTASI untuk SELURUH IslandNode
+        const M_no_rot = LIBS.get_I4();
+        // Gabungkan world position pulau DENGAN view matrix tanpa rotasi
+        LIBS.mul(M_no_rot, viewMatrixNoRot, this.POSITION_MATRIX); // view_no_rot * world_pos
+        LIBS.mul(M_no_rot, M_no_rot, this.MOVE_MATRIX);     // (view_no_rot * world_pos) * local_move
 
-        // Render semua anak opaque (Pohon, Poké Ball, Rumput, Pokémon)
-        this.childs.forEach(c => c.render(M));
+        // Matriks ini (M_no_rot) akan digunakan untuk SEMUA objek di dalam pulau ini.
 
-        // --- 2. RENDER OBJEK TRANSPARAN (Air Terjun) ---
-        if (!this.app.waterfallProgram || !this.app.camera) return; // Keluar jika shader air gagal
-        this.gl.useProgram(this.app.waterfallProgram);
+        // --- 2. RENDER SEMUA OBJEK OPAQUE (Pulau & Isinya) ---
+        if (!this.app.mainProgram) return;
+        this.gl.useProgram(this.app.mainProgram);
 
-        // Atur blending untuk transparansi
-        this.gl.enable(this.gl.BLEND);
-        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-        this.gl.depthMask(false); // Matikan penulisan depth
+        // Gambar geometri dasar pulau pakai M_no_rot
+        // (Kita perlu terapkan transformasi lokal geometri pulau secara terpisah)
+        let islandGeometryMv = LIBS.get_I4();
+        LIBS.mul(islandGeometryMv, M_no_rot, this.ISLAND_GEOMETRY_MATRIX);
+        LIBS.rotateX(islandGeometryMv,0 ); // Animasi goyang pelan
+        this.env._drawObject(this.buffers.island, islandGeometryMv);
 
-        // Setel matriks proyeksi untuk shader air
-        this.gl.uniformMatrix4fv(this.app.wProjLoc, false, this.app.camera.getProjectionMatrix());
+        // ▼▼▼ UBAH: Render semua anak opaque pakai M_no_rot ▼▼▼
+        // (Pohon, Poké Ball, Rumput, Pokémon)
+        this.childs.forEach(c => c.render(M_no_rot));
+        // ▲▲▲ SELESAI ▲▲▲
 
-        // Render sumber air
-        if (this.waterSource) {
-            this.waterSource.render(M);
-        }
-        // Render aliran air
-        if (this.waterStream) {
-            this.waterStream.render(M);
-        }
+        // --- 3. RENDER OBJEK TRANSPARAN (Air Terjun) ---
+        if (!this.app.waterfallProgram || !this.app.camera) return;
+        this.gl.useProgram(this.app.waterfallProgram);
 
-        // Kembalikan pengaturan GL ke normal
-        this.gl.depthMask(true); // Nyalakan lagi penulisan depth
-        this.gl.disable(this.gl.BLEND);
-    }
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+        this.gl.depthMask(false);
+
+        this.gl.uniformMatrix4fv(this.app.wProjLoc, false, this.app.camera.getProjectionMatrix());
+
+        // ▼▼▼ UBAH: Render sumber air & aliran air pakai M_no_rot ▼▼▼
+        if (this.waterSource) {
+            this.waterSource.render(M_no_rot);
+        }
+        if (this.waterStream) {
+            this.waterStream.render(M_no_rot);
+        }
+        // ▲▲▲ SELESAI ▲▲▲
+
+        this.gl.depthMask(true);
+        this.gl.disable(this.gl.BLEND);
+    }
 }
