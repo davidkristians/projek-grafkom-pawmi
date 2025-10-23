@@ -31,7 +31,10 @@ const globalApp = {
     actors: [], // Berisi IslandNodes
     islandPositions: [[-6, 0, 0], [0, 0, 0], [6, 0, 0]],
     camera: null,
-    currentTime: 0 // Waktu global untuk animasi shader (jika ada)
+    currentTime: 0, // Waktu global untuk animasi shader (jika ada)
+    islandRotY: 0, // Rotasi Yaw (Kiri/Kanan)
+    islandRotX: 0, // Rotasi Pitch (Atas/Bawah)
+    rotationSpeed: LIBS.degToRad(2.0) // Kecepatan rotasi per frame
 };
 window.myApp = globalApp;
 
@@ -121,6 +124,23 @@ function mainRenderLoop(time) {
     // Update state animasi dan input kamera
     animation.update(time, deltaTime);
     camera.update(deltaTime); // Kamera menghitung viewMatrix BARU berdasarkan input
+
+    const keys = globalApp.camera.keys;
+    const speed = globalApp.rotationSpeed;
+
+    if (keys['arrowleft']) {
+        globalApp.islandRotY += speed; // Putar ke Kiri (Yaw positif)
+        
+    }
+    if (keys['arrowright']) {
+        globalApp.islandRotY -= speed; // Putar ke Kanan (Yaw negatif)
+    }
+    if (keys['arrowup']) {
+        globalApp.islandRotX -= speed; // Angkat/Miring ke Atas (Pitch negatif, sesuai konvensi)
+    }
+    if (keys['arrowdown']) {
+        globalApp.islandRotX += speed; // Turunkan/Miring ke Bawah (Pitch positif)
+    }
 
     // Dapatkan matriks terbaru LANGSUNG dari kamera
     const currentViewMatrix = camera.getViewMatrix();

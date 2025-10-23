@@ -15,6 +15,7 @@ import { pawmotFoot } from "../geometry3/pawmot-foot.js";
 // ▼▼▼ BARU: Import Ruff ▼▼▼
 import { pawmotRuff, RuffSpike } from "../geometry3/pawmot-ruff.js";
 import { pawmotTuft } from "../geometry3/pawmot-tuft.js"; // Asumsi lokasi file
+import { paraboloid } from "../geometry3/paraboloid.js"; // Butuh untuk pawmot-foot
 
 // Fungsi patchRenderPrototype
 function patchRenderPrototype(proto, normMatLoc) {
@@ -112,6 +113,50 @@ export function createPawmot(animationLoop) {
     LIBS.set_I4(PawmotRig.POSITION_MATRIX);
     LIBS.translateY(PawmotRig.POSITION_MATRIX, 1.1); // Offset Y LOKAL
     LIBS.scale(PawmotRig.POSITION_MATRIX, 0.2, 0.2, 0.2); 
+
+    // ▼▼▼ BARU: Tambahkan state untuk gerakan wandering ▼▼▼
+    PawmotRig.movementState = {
+        baseY: 1.38,       // Simpan Y-offset awal
+        baseScale: 0.2,   // Simpan skala awal
+        currentX: 0,      // Posisi X saat ini (relatif ke pusat pulau)
+        currentZ: 0,      // Posisi Z saat ini
+        currentFacingAngle: Math.random() * 2 * Math.PI, // Arah hadap saat ini (radian)
+        targetFacingAngle: Math.random() * 2 * Math.PI,  // Arah tujuan (radian)
+        timeToNextChange: 0, // Waktu (detik) sampai ganti arah
+        speed: 0.5,       // Kecepatan gerak (unit per detik)
+        turnSpeed: LIBS.degToRad(60), // Kecepatan belok (90 deg/detik)
+        // --- Data untuk Collision & Ground Tilt ---
+        pawmotRadius: 0.4, // Radius tabrakan Pawmot (dibuat agak besar)
+        
+        // Ambil dari IslandNode.js -> fullIslandGrass -> rotateX
+        grassTiltRad: LIBS.degToRad(-16.0), 
+        
+        // Hardcode posisi rintangan dari environment.js
+        // Format: { x: ..., z: ..., r: (radius tabrakan) }
+        obstacles: [
+            // Pohon 1 (pos: [-1.3, 0, -0.6])
+            { x: -1.3, z: -0.6, r: 0.25 }, 
+            // Pohon 2 (pos: [1.4, 0, -0.9])
+            { x: 1.4, z: -0.9, r: 0.25 },
+            // Pokeball 1 (pos: [-1.6, 0, 0.9])
+            { x: -1.6, z: 0.9, r: 0.2 },
+            // Pokeball 2 (pos: [1.5, 0, 0.6])
+            { x: 1.5, z: 0.6, r: 0.2 }
+        ],
+
+        // --- TAMBAHAN BARU ---
+        isEvading: false,  // Apakah sedang dalam mode menghindar?
+        evadeTimer: 0  ,    // Timer untuk durasi menghindar
+
+        // --- TAMBAHAN BARU ---
+        isPausing: false,  // Apakah sedang berhenti?
+        pauseTimer: 0,      // Timer untuk durasi berhenti
+
+        // --- TAMBAHAN BARU ---
+        isSeekingCenter: false // Apakah sedang berjalan ke tengah?
+        
+    };
+    // ▲▲▲ AKHIR BARU ▲▲▲
 
     // Daftarkan fungsi animasinya
     animationLoop.registerActorAnimation(PawmotRig, animatePawmot);

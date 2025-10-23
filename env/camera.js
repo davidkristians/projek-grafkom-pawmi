@@ -161,35 +161,35 @@ export class Camera {
         const rightY = 0;
         const rightZ = -sinYaw;
 
-        // --- Hitung Vektor Gerakan Berdasarkan Input Keyboard ---
-        // (Perhitungan moveX/Y/Z tetap sama)
-        let moveX = 0;
-        let moveY = 0;
-        let moveZ = 0;
-        if (this.keys['w']) {
-            moveX += forwardX * moveSpeed;
-            moveY += forwardY * moveSpeed;
-            moveZ += forwardZ * moveSpeed;
-        }
-        if (this.keys['s']) {
-            moveX -= forwardX * moveSpeed;
-            moveY -= forwardY * moveSpeed;
-            moveZ -= forwardZ * moveSpeed;
-        }
-        if (this.keys['a']) {
-            moveX -= rightX * moveSpeed;
-            moveZ -= rightZ * moveSpeed;
-        }
-        if (this.keys['d']) {
-            moveX += rightX * moveSpeed;
-            moveZ += rightZ * moveSpeed;
-        }
-        if (this.keys[' ']) {
-            moveY += moveSpeed;
-        }
-        if (this.keys['shift']) {
-            moveY -= moveSpeed;
-        }
+        // --- Hitung Vektor Gerakan Berdasarkan Input Keyboard ---
+        // (Perhitungan moveX/Y/Z tetap sama)
+        let moveX = 0;
+        let moveY = 0;
+        let moveZ = 0;
+        if (this.keys['w']) {
+            moveX += forwardX * moveSpeed;
+            moveY += forwardY * moveSpeed;
+            moveZ += forwardZ * moveSpeed;
+        }
+        if (this.keys['s']) {
+            moveX -= forwardX * moveSpeed;
+            moveY -= forwardY * moveSpeed;
+            moveZ -= forwardZ * moveSpeed;
+        }
+        if (this.keys['a']) {
+            moveX -= rightX * moveSpeed;
+            moveZ -= rightZ * moveSpeed;
+        }
+        if (this.keys['d']) {
+            moveX += rightX * moveSpeed;
+            moveZ += rightZ * moveSpeed;
+        }
+        if (this.keys[' ']) {
+            moveY += moveSpeed;
+        }
+        if (this.keys['shift']) {
+            moveY -= moveSpeed;
+        }
 
         // ▼▼▼ LOGIKA UTAMA: Terapkan gerakan ke TARGET (TPV) atau KAMERA (FPV) ▼▼▼
         if (this.isThirdPerson && this.targetObject) {

@@ -88,6 +88,8 @@ export class IslandNode extends group {
         LIBS.mul(M_no_rot, M_no_rot, this.MOVE_MATRIX);     // (view_no_rot * world_pos) * local_move
 
         // Matriks ini (M_no_rot) akan digunakan untuk SEMUA objek di dalam pulau ini.
+        LIBS.rotateY(M_no_rot, this.app.islandRotY);
+        LIBS.rotateX(M_no_rot, this.app.islandRotX);
 
         // --- 2. RENDER SEMUA OBJEK OPAQUE (Pulau & Isinya) ---
         if (!this.app.mainProgram) return;

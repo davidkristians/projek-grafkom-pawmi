@@ -24,7 +24,11 @@ export class pawmoTorsoSegment {
         // ▲▲▲ SELESAI ▲▲▲
 
         // Profil Bézier (bisa disesuaikan lagi jika perlu)
+<<<<<<< HEAD
         const p0 = [0.0, -1.6];
+=======
+        const p0 = [0, -1.6];
+>>>>>>> toti
         const p1 = [1.8, -1.0];
         const p2 = [1.3, 1.6];
         const p3 = [0.0, 1.8];

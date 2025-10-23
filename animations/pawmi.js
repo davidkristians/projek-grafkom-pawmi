@@ -6,6 +6,11 @@ const LIBS = window.LIBS;
 const PAWMI_HAND_ROT_AMPLITUDE = LIBS.degToRad(15);
 const PAWMI_HAND_SPEED = 2.5;
 const PAWMI_HEAD_NOD_AMPLITUDE = LIBS.degToRad(15);
+
+// --- KONSTANTA BARU UNTUK JUMP ---
+const PAWMI_JUMP_DURATION = 1.0; 
+const PAWMI_JUMP_HEIGHT = 0.5;
+
 const PAWMI_HEAD_SPEED = 3.0;
 const PAWMI_HEAD_TRANS_AMPLITUDE = 0.08;
 const PAWMI_TAIL_SPEED = 3.5;
@@ -57,10 +62,12 @@ export function animatePawmi(actor, time, deltaTime) {
         positionZ = 0;
         rotationY = Math.PI + (Math.PI * smoothT);
     }
+    const jumpCycleTime = (time % PAWMI_JUMP_DURATION) / PAWMI_JUMP_DURATION; 
+    const jumpOffset = PAWMI_JUMP_HEIGHT * Math.sin(jumpCycleTime * Math.PI);
 
     // Terapkan transformasi gerakan ke SELURUH actor (POSITION_MATRIX)
     LIBS.set_I4(actor.POSITION_MATRIX);
-    LIBS.translateY(actor.POSITION_MATRIX, 1.09); // posisi Y tetap
+    LIBS.translateY(actor.POSITION_MATRIX, 1.07+ jumpOffset); // posisi Y tetap
     LIBS.rotateY(actor.POSITION_MATRIX, rotationY); // rotasi badan
     LIBS.translateZ(actor.POSITION_MATRIX, positionZ); // gerakan maju-mundur
     LIBS.translateY(actor.POSITION_MATRIX, 0.3); // posisi X tetap
@@ -69,9 +76,10 @@ export function animatePawmi(actor, time, deltaTime) {
     // ... (Kode konstanta di atas tidak berubah)
 
     // --- KONSTANTA BARU untuk Rotasi Ekor Penuh (Disarankan) ---
-    const TAIL_SPIN_SPEED = 8.0;
+    const TAIL_SPIN_SPEED = 3.5;
     const TAIL_TILT_ANGLE = LIBS.degToRad(20);
     const MAX_ANGLE = 2 * Math.PI;
+    const PAWMI_TAIL_AMOUNT = 0.9; //
 
     // --- KONSTANTA TRANSLASI BARU UNTUK MENGHINDARI CLIPPING ---
     const TAIL_OFFSET_Z = 0.2; // Pindahkan ekor 0.1 unit ke belakang (menjauhi badan)
@@ -84,12 +92,12 @@ export function animatePawmi(actor, time, deltaTime) {
     // Animasi Ekor
     if (actor.tailRef) {
         const tailRotationZ = Math.sin(time * PAWMI_TAIL_SPEED) * PAWMI_TAIL_AMOUNT;
-        const tailRotationY = (time * TAIL_SPIN_SPEED) % MAX_ANGLE;
+        const tailRotationX = (time * TAIL_SPIN_SPEED) % MAX_ANGLE;
 
         LIBS.set_I4(actor.tailRef.MOVE_MATRIX);
 
         // 1. Miringkan ekor (Kemiringan Statis)
-        LIBS.rotateX(actor.tailRef.MOVE_MATRIX, tailRotationY);
+        LIBS.rotateX(actor.tailRef.MOVE_MATRIX, tailRotationX);
 
         // 2. Rotasi Berkelanjutan (Putaran Penuh) pada Sumbu Y
         LIBS.rotateY(actor.tailRef.MOVE_MATRIX, TAIL_TILT_ANGLE);
@@ -99,9 +107,9 @@ export function animatePawmi(actor, time, deltaTime) {
 
         // 4. TRANSLASI UNTUK MENGHINDARI TEMBUS BADAN (CLIPPING)
         // Ini adalah langkah kunci untuk memperbaiki clipping setelah semua rotasi diterapkan.
-        LIBS.translateZ(actor.tailRef.MOVE_MATRIX, TAIL_OFFSET_Z+-0.45);
+        LIBS.translateZ(actor.tailRef.MOVE_MATRIX, TAIL_OFFSET_Z+-0.36);
         LIBS.translateY(actor.tailRef.MOVE_MATRIX, TAIL_OFFSET_Y);
-        LIBS.translateX(actor.tailRef.MOVE_MATRIX, 0.15); // Tidak ada offset pada sumbu X
+        LIBS.translateX(actor.tailRef.MOVE_MATRIX, -0.3); // Tidak ada offset pada sumbu X
 
     }
 
@@ -128,14 +136,15 @@ export function animatePawmi(actor, time, deltaTime) {
         const rotZ = sinHand * PAWMI_HAND_ROT_AMPLITUDE;
         LIBS.set_I4(actor.RightFootMove);
         LIBS.rotateX(actor.RightFootMove, rotZ + 0.2);
-        LIBS.translateY(actor.RightFootMove, -rotZ);
+        LIBS.translateY(actor.RightFootMove, -rotZ+0.5);
         LIBS.translateX(actor.RightFootMove, -rotZ + 0.05);
+       
     }
     if (actor.LeftFootMove) {
         const rotZ = sinHand * PAWMI_HAND_ROT_AMPLITUDE;
         LIBS.set_I4(actor.LeftFootMove);
         LIBS.rotateX(actor.LeftFootMove, -rotZ + 0.2);
-        LIBS.translateY(actor.LeftFootMove, rotZ);
+        LIBS.translateY(actor.LeftFootMove, rotZ+0.5);
         LIBS.translateX(actor.LeftFootMove, rotZ - 0.05);
     }
 
