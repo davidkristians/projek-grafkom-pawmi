@@ -89,6 +89,21 @@ export function animatePawmi(actor, time, deltaTime) {
         LIBS.translateX(actor.leftHandMove, -rotZ - 0.2);
     }
 
+    if (actor.RightFootMove) {
+        const rotZ = sinHand * PAWMI_HAND_ROT_AMPLITUDE;
+        LIBS.set_I4(actor.RightFootMove);
+        LIBS.rotateX(actor.RightFootMove, rotZ+0.2);
+        LIBS.translateY(actor.RightFootMove, -rotZ );
+        LIBS.translateX(actor.RightFootMove, -rotZ + 0.05);
+    }
+    if (actor.LeftFootMove) {
+        const rotZ = sinHand * PAWMI_HAND_ROT_AMPLITUDE;
+        LIBS.set_I4(actor.LeftFootMove);
+        LIBS.rotateX(actor.LeftFootMove, -rotZ+0.2);
+        LIBS.translateY(actor.LeftFootMove, rotZ );
+        LIBS.translateX(actor.LeftFootMove, rotZ - 0.05);
+    }
+
     // Animasi Tangan Kanan
     if (actor.rightHandMove) {
         const rotZ = sinHand * PAWMI_HAND_ROT_AMPLITUDE;
