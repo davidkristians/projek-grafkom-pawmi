@@ -1,4 +1,4 @@
-import { getBezierPoint, getBezierTangent } from "./bezier.js"; // Pastikan getBezierTangent di-import
+import { getBezierPoint, getBezierTangent } from "./bezier.js";
 
 export class pawmotTorso {
     constructor(GL, SHADER_PROGRAM, _position, _color, _normal, _Mmatrix, opts = {}) {
@@ -23,8 +23,6 @@ export class pawmotTorso {
             const profilePoint = getBezierPoint(t, p0, p1, p2, p3);
             const radius = profilePoint.x;
             const y = profilePoint.y;
-
-            // ▼▼▼ TAMBAHKAN LOGIKA NORMAL YANG BENAR ▼▼▼
             const tangent = getBezierTangent(t, p0, p1, p2, p3);
             const normal2D = { x: tangent.y, y: -tangent.x };
 
@@ -32,13 +30,12 @@ export class pawmotTorso {
                 const angle = (j / segments) * 2 * Math.PI;
                 const x = radius * Math.cos(angle);
                 const z = radius * Math.sin(angle);
-                
                 const nx = normal2D.x * Math.cos(angle);
                 const ny = normal2D.y;
                 const nz = normal2D.x * Math.sin(angle);
                 const len = Math.sqrt(nx*nx + ny*ny + nz*nz);
                 
-                // Push 9 data: 3 posisi, 3 warna, 3 normal
+                // Push 9 data (3 posisi, 3 warna, 3 normal)
                 vertices.push(x, y, z, ...color, nx/len, ny/len, nz/len);
             }
         }
@@ -59,7 +56,6 @@ export class pawmotTorso {
         this.GL.bufferData(this.GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.faces), this.GL.STATIC_DRAW);
     }
     
-    // ▼▼▼ GANTI TOTAL DENGAN METODE RENDER YANG STANDAR ▼▼▼
     render(PARENT_MATRIX) {
         const M = LIBS.get_I4();
         LIBS.mul(M, PARENT_MATRIX, this.POSITION_MATRIX);

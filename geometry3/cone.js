@@ -1,4 +1,3 @@
-// geometry3/cone.js
 export class cone {
     constructor(GL, SHADER_PROGRAM, _position, _color, _normal, _Mmatrix, opts = {}) {
         this.GL = GL; this.SHADER_PROGRAM = SHADER_PROGRAM;
@@ -48,6 +47,5 @@ export class cone {
         this.GL.bindBuffer(this.GL.ELEMENT_ARRAY_BUFFER, this.OBJECT_FACES);
         this.GL.bufferData(this.GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.faces), this.GL.STATIC_DRAW);
     }
-    // ▼▼▼ DIUBAH: Fungsi render diganti placeholder ▼▼▼
-    render(PARENT_MATRIX) { /* ... This will be patched ... */ }
+    render(PARENT_MATRIX) {  }
 }

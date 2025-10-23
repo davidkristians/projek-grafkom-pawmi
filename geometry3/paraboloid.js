@@ -1,11 +1,8 @@
-// geometry/paraboloid.js
-
 export class paraboloid {
-    // ▼▼▼ DIUBAH: Tambahkan _normal ▼▼▼
     constructor(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, opts = {}) {
         this.GL = GL; this.SHADER_PROGRAM = SHADER_PROGRAM;
         this._position = _position; this._color = _color; this._MMatrix = _Mmatrix;
-        this._normal = _normal; // BARU
+        this._normal = _normal;
         
         this.POSITION_MATRIX = LIBS.get_I4();
         this.MOVE_MATRIX = LIBS.get_I4();
@@ -36,7 +33,6 @@ export class paraboloid {
                 const y = height * u * u;
                 const z = rz * u * sv;
 
-                // ▼▼▼ BARU: Hitung normal untuk paraboloid ▼▼▼
                 const tangentU = { x: rx * cv, y: 2 * height * u, z: rz * sv };
                 const tangentV = { x: -rx * u * sv, y: 0, z: rz * u * cv };
 
@@ -44,14 +40,12 @@ export class paraboloid {
                 let ny = tangentU.z * tangentV.x - tangentU.x * tangentV.z;
                 let nz = tangentU.x * tangentV.y - tangentU.y * tangentV.x;
                 
-                // Normal harus menghadap keluar (y-nya harus negatif dalam kasus ini)
                 if (ny > 0) {
                     nx = -nx; ny = -ny; nz = -nz;
                 }
 
                 const len = Math.sqrt(nx*nx + ny*ny + nz*nz) || 1;
 
-                // ▼▼▼ DIUBAH: Tambahkan normal ke vertex (stride 9) ▼▼▼
                 vertices.push(x, y, z, ...color, nx/len, ny/len, nz/len);
             }
         }
@@ -76,6 +70,6 @@ export class paraboloid {
         this.GL.bufferData(this.GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.faces), this.GL.STATIC_DRAW);
         this.childs.forEach(c => c.setup());
     }
-    // Render() akan di-patch oleh pawmo.js
-    render(PARENT_MATRIX) { /* ... This will be patched ... */ }
+    
+    render(PARENT_MATRIX) {  }
 }

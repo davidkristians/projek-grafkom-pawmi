@@ -13,8 +13,6 @@ export class pawmotTuft {
     _build(opts) {
         const color = opts.color ?? [1, 1, 1];
         const segments = 16, rings = 16;
-
-        // ▼▼▼ BENTUK BEZIER DIUBAH MENJADI LEBIH RAMPING DAN LANCIP ▼▼▼
         const p0 = [0, -0.6], p1 = [0.4, 0], p2 = [0.2, 0.7], p3 = [0.0, 0.9];
         
         const vertices = [], faces = [];
@@ -27,7 +25,6 @@ export class pawmotTuft {
 
             for (let j = 0; j <= segments; j++) {
                 const angle = (j / segments) * 2 * Math.PI;
-                // ▼▼▼ DITAMBAHKAN FAKTOR PEMIPIH AGAR BENTUKNYA TIDAK BULAT SEMPURNA ▼▼▼
                 const flatteningFactor = 1;
                 const x = (radius * Math.cos(angle)) * flatteningFactor; 
                 const z = radius * Math.sin(angle);

@@ -1,5 +1,3 @@
-// geometry3/pawmot-foot.js
-
 function generateHemiEllipsoid(rx, ry, rz, segments, rings, color) {
     const vertices = [], faces = [];
     for (let i = 0; i <= rings; i++) {
@@ -33,15 +31,16 @@ function generateHemiEllipsoid(rx, ry, rz, segments, rings, color) {
     return { vertices, faces };
 }
 
-export class pawmotFoot { // Nama kelas tetap pawmoFoot agar konsisten
+export class pawmotFoot {
     constructor(GL, SHADER_PROGRAM, _position, _color, _normal, _Mmatrix, opts = {}) {
         this.GL=GL; this.SHADER_PROGRAM=SHADER_PROGRAM;
         this._position=_position; this._color=_color; this._normal=_normal;
         this._MMatrix=_Mmatrix;
         this.POSITION_MATRIX=LIBS.get_I4(); this.MOVE_MATRIX=LIBS.get_I4();
-        this.childs = []; // Tambahkan childs agar patch tidak error
+        this.childs = []; // Supaya parent tidak error
         this._build(opts);
     }
+    
     _build(opts) {
         const rx = opts.rx ?? 0.5, ry = opts.ry ?? 0.4, rz = opts.rz ?? 0.7;
         const color = opts.color ?? [1,1,1];
@@ -49,12 +48,13 @@ export class pawmotFoot { // Nama kelas tetap pawmoFoot agar konsisten
         this.vertex = geo.vertices;
         this.faces = geo.faces;
     }
+
     setup() {
         this.OBJECT_VERTEX=this.GL.createBuffer(); this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.OBJECT_VERTEX);
         this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array(this.vertex), this.GL.STATIC_DRAW);
         this.OBJECT_FACES=this.GL.createBuffer(); this.GL.bindBuffer(this.GL.ELEMENT_ARRAY_BUFFER, this.OBJECT_FACES);
         this.GL.bufferData(this.GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.faces), this.GL.STATIC_DRAW);
     }
-    // ▼▼▼ DIUBAH: Fungsi render diganti placeholder ▼▼▼
-    render(PARENT_MATRIX) { /* ... This will be patched ... */ }
+
+    render(PARENT_MATRIX) { }
 }
