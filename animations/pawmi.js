@@ -13,10 +13,58 @@ const PAWMI_TAIL_AMOUNT = 0.25;
 const PAWMI_MOUTH_SPEED = 2.0;
 const PAWMI_MOUTH_MAX_SCALE = 1.4;
 
+// Konstanta untuk gerakan maju-mundur
+const PAWMI_WALK_CYCLE_DURATION = 4.0; // durasi satu siklus penuh (maju + mundur) dalam detik
+const PAWMI_WALK_DISTANCE = 1.5; // jarak maksimal bergerak
+const PAWMI_TURN_DURATION = 0.8; // durasi rotasi 180 derajat dalam detik
+
 // Fungsi animasi yang diekspor
 export function animatePawmi(actor, time, deltaTime) {
     const sinHand = Math.sin(time * PAWMI_HAND_SPEED);
     const sinHead = Math.sin(time * PAWMI_HEAD_SPEED);
+
+    // === ANIMASI GERAKAN MAJU-MUNDUR dengan ROTASI ===
+    const totalCycle = PAWMI_WALK_CYCLE_DURATION + (PAWMI_TURN_DURATION * 2);
+    const cycleTime = time % totalCycle;
+    
+    let positionZ = 0;
+    let rotationY = 0;
+    
+    if (cycleTime < PAWMI_WALK_CYCLE_DURATION / 2) {
+        // Fase 1: MAJU (0 -> WALK_CYCLE_DURATION/2)
+        const t = cycleTime / (PAWMI_WALK_CYCLE_DURATION / 2);
+        positionZ = PAWMI_WALK_DISTANCE * t;
+        rotationY = 0;
+    } 
+    else if (cycleTime < PAWMI_WALK_CYCLE_DURATION / 2 + PAWMI_TURN_DURATION) {
+        // Fase 2: PUTAR 180 derajat
+        const t = (cycleTime - PAWMI_WALK_CYCLE_DURATION / 2) / PAWMI_TURN_DURATION;
+        // Smooth easing (ease-in-out)
+        const smoothT = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        positionZ = PAWMI_WALK_DISTANCE;
+        rotationY = Math.PI * smoothT;
+    }
+    else if (cycleTime < PAWMI_WALK_CYCLE_DURATION + PAWMI_TURN_DURATION) {
+        // Fase 3: MUNDUR (sebenarnya maju tapi badan sudah 180)
+        const t = (cycleTime - PAWMI_WALK_CYCLE_DURATION / 2 - PAWMI_TURN_DURATION) / (PAWMI_WALK_CYCLE_DURATION / 2);
+        positionZ = PAWMI_WALK_DISTANCE * (1 - t);
+        rotationY = Math.PI;
+    }
+    else {
+        // Fase 4: PUTAR BALIK ke depan
+        const t = (cycleTime - PAWMI_WALK_CYCLE_DURATION - PAWMI_TURN_DURATION) / PAWMI_TURN_DURATION;
+        const smoothT = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        positionZ = 0;
+        rotationY = Math.PI + (Math.PI * smoothT);
+    }
+    
+    // Terapkan transformasi gerakan ke SELURUH actor (POSITION_MATRIX)
+    LIBS.set_I4(actor.POSITION_MATRIX);
+    LIBS.translateY(actor.POSITION_MATRIX, 1.09); // posisi Y tetap
+    LIBS.rotateY(actor.POSITION_MATRIX, rotationY); // rotasi badan
+    LIBS.translateZ(actor.POSITION_MATRIX, positionZ); // gerakan maju-mundur
+    LIBS.translateY(actor.POSITION_MATRIX, 0.3); // posisi X tetap
+    LIBS.scale(actor.POSITION_MATRIX, 0.2, 0.2, 0.2); // scale tetap
 
     // Animasi Ekor
     if (actor.tailRef) {
