@@ -113,7 +113,7 @@ export function createPawmo(animationLoop) {
 
     // Posisikan Aktor LOKAL di atas pulau
     LIBS.set_I4(PawmoRig.POSITION_MATRIX);
-    LIBS.translateY(PawmoRig.POSITION_MATRIX, 2);
+    LIBS.translateY(PawmoRig.POSITION_MATRIX, 1.5);
     LIBS.translateX(PawmoRig.POSITION_MATRIX, 0.5);
     LIBS.translateZ(PawmoRig.POSITION_MATRIX, 0.5);
     LIBS.scale(PawmoRig.POSITION_MATRIX, 0.2, 0.2, 0.2); 
