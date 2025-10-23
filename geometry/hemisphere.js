@@ -74,9 +74,9 @@ export class hemisphere {
 
         for (let j = 0; j < segments; j++) {
             if (topHalf) {
-                 faces.push(capCenterIndex, capCenterIndex + j + 2, capCenterIndex + j + 1);
+                faces.push(capCenterIndex, capCenterIndex + j + 2, capCenterIndex + j + 1);
             } else {
-                 faces.push(capCenterIndex, capCenterIndex + j + 1, capCenterIndex + j + 2);
+                faces.push(capCenterIndex, capCenterIndex + j + 1, capCenterIndex + j + 2);
             }
         }
 

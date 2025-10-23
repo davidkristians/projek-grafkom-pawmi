@@ -1,5 +1,3 @@
-// geometry/ellipticParaboloid.js
-
 export class ellipticParaboloid {
     constructor(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, opts = {}) {
         this.GL = GL; this.SHADER_PROGRAM = SHADER_PROGRAM;
@@ -77,7 +75,7 @@ export class ellipticParaboloid {
             }
         }
 
-        // Buat tutup atas (opsional)
+        // Buat tutup atas
         if (addCap && height > 0) {
             const capY = height;
             const cap_rx = a * Math.sqrt(capY / c);
@@ -123,7 +121,7 @@ export class ellipticParaboloid {
         this.GL.useProgram(this.SHADER_PROGRAM);
         this.GL.uniformMatrix4fv(this._MMatrix, false, M);
         // Jangan lupa kirim Normal Matrix jika shader membutuhkannya
-        // this.GL.uniformMatrix4fv(this._NMatrix, false, M); // Jika ada _NMatrix
+        // this.GL.uniformMatrix4fv(this._NMatrix, false, M); // kalau ada _NMatrix
 
         this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.OBJECT_VERTEX);
 
@@ -138,7 +136,7 @@ export class ellipticParaboloid {
         this.GL.bindBuffer(this.GL.ELEMENT_ARRAY_BUFFER, this.OBJECT_FACES);
         this.GL.drawElements(this.GL.TRIANGLES, this.faces.length, this.GL.UNSIGNED_SHORT, 0);
 
-        // Nonaktifkan atribut setelah selesai (praktik baik)
+        // Nonaktifkan atribut setelah selesai
         this.GL.disableVertexAttribArray(this._position);
         this.GL.disableVertexAttribArray(this._color);
         this.GL.disableVertexAttribArray(this._normal);
