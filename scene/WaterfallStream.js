@@ -18,7 +18,9 @@ export class WaterfallStream {
         const bottomRadius = 0.8; // Radius di bagian bawah (saat menyebar)
         const segmentsH = 20; // Jumlah segmen vertikal untuk kelancaran lengkungan
         const segmentsR = 12; // Jumlah segmen radial
-        const color = [0.4, 0.7, 1.0]; // Biru air
+        // ▼▼▼ WARNA DIUBAH DI SINI ▼▼▼
+        const color = [0.3, 0.6, 1.0]; // Biru lebih terang
+        // ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲
 
         let vertices = [];
         let colors = [];
@@ -38,9 +40,6 @@ export class WaterfallStream {
                 vertices.push(x, y, z);
                 colors.push(...color);
 
-                // Normal untuk bentuk silinder/kerucut, menghadap keluar
-                // Normalnya harusnya tegak lurus permukaan.
-                // Untuk permukaan yang melengkung secara radial, normalnya cenderung horizontal
                 let normalX = x / currentRadius;
                 let normalZ = z / currentRadius;
                 normals.push(normalX, 0, normalZ); // Normal horisontal
@@ -65,22 +64,21 @@ export class WaterfallStream {
         this.setup();
     }
 
-    // HAPUS FUNGSI LAMA, LALU PASTE YANG INI DI actors/WaterfallStream.js
     setup() {
         this.OBJECT_VERTEX = this.GL.createBuffer();
-        this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.OBJECT_VERTEX); // <-- Pastikan ini benar
+        this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.OBJECT_VERTEX);
         this.GL.bufferData(this.GL.ARRAY_BUFFER, this.vertices, this.GL.STATIC_DRAW);
 
         this.OBJECT_COLORS = this.GL.createBuffer();
-        this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.OBJECT_COLORS); // <-- Pastikan ini benar
+        this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.OBJECT_COLORS);
         this.GL.bufferData(this.GL.ARRAY_BUFFER, this.colors, this.GL.STATIC_DRAW);
 
         this.OBJECT_NORMALS = this.GL.createBuffer();
-        this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.OBJECT_NORMALS); // <-- Pastikan ini benar
+        this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.OBJECT_NORMALS);
         this.GL.bufferData(this.GL.ARRAY_BUFFER, this.normals, this.GL.STATIC_DRAW);
 
         this.OBJECT_FACES = this.GL.createBuffer();
-        this.GL.bindBuffer(this.GL.ELEMENT_ARRAY_BUFFER, this.OBJECT_FACES); // <-- Pastikan ini benar
+        this.GL.bindBuffer(this.GL.ELEMENT_ARRAY_BUFFER, this.OBJECT_FACES);
         this.GL.bufferData(this.GL.ELEMENT_ARRAY_BUFFER, this.faces, this.GL.STATIC_DRAW);
     }
 
@@ -106,5 +104,10 @@ export class WaterfallStream {
 
         this.GL.bindBuffer(this.GL.ELEMENT_ARRAY_BUFFER, this.OBJECT_FACES);
         this.GL.drawElements(this.GL.TRIANGLES, this.faces.length, this.GL.UNSIGNED_SHORT, 0);
+
+        // Disable setelah render
+        this.GL.disableVertexAttribArray(this._position);
+        this.GL.disableVertexAttribArray(this._color);
+        this.GL.disableVertexAttribArray(this._normal);
     }
 }
