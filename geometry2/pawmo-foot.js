@@ -94,16 +94,16 @@ export class pawmoFoot extends group {
         
         // Buat bantalan
         const mainPad = new paraboloid(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, { rx: 0.25, height: 0.15, rz: 0.3, color: PAW_PAD_COLOR, segments: 12, rings: 12 });
-        LIBS.translateY(mainPad.POSITION_MATRIX, 0.05); LIBS.translateZ(mainPad.POSITION_MATRIX, 0.2); LIBS.rotateX(mainPad.POSITION_MATRIX, LIBS.degToRad(-10));
+        LIBS.translateY(mainPad.POSITION_MATRIX, -0.1); LIBS.translateZ(mainPad.POSITION_MATRIX, 0.2); LIBS.rotateX(mainPad.POSITION_MATRIX, LIBS.degToRad(-10));
 
         const toePads = [];
         for (let i = 0; i < 3; i++) {
             toePads.push(new paraboloid(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, { rx: 0.1, height: 0.1, rz: 0.1, color: PAW_PAD_COLOR, segments: 8, rings: 8 }));
         }
         
-        LIBS.translateX(toePads[0].POSITION_MATRIX, -0.2); LIBS.translateY(toePads[0].POSITION_MATRIX, 0.05); LIBS.translateZ(toePads[0].POSITION_MATRIX, 0.45); LIBS.rotateX(toePads[0].POSITION_MATRIX, LIBS.degToRad(-20));
-        LIBS.translateX(toePads[1].POSITION_MATRIX, 0.0);  LIBS.translateY(toePads[1].POSITION_MATRIX, 0.05); LIBS.translateZ(toePads[1].POSITION_MATRIX, 0.5);  LIBS.rotateX(toePads[1].POSITION_MATRIX, LIBS.degToRad(-20));
-        LIBS.translateX(toePads[2].POSITION_MATRIX, 0.2);  LIBS.translateY(toePads[2].POSITION_MATRIX, 0.05); LIBS.translateZ(toePads[2].POSITION_MATRIX, 0.45); LIBS.rotateX(toePads[2].POSITION_MATRIX, LIBS.degToRad(-20));
+        LIBS.translateX(toePads[0].POSITION_MATRIX, -0.2); LIBS.translateY(toePads[0].POSITION_MATRIX, -0.1); LIBS.translateZ(toePads[0].POSITION_MATRIX, 0.45); LIBS.rotateX(toePads[0].POSITION_MATRIX, LIBS.degToRad(-20));
+        LIBS.translateX(toePads[1].POSITION_MATRIX, 0.0);  LIBS.translateY(toePads[1].POSITION_MATRIX, -0.1); LIBS.translateZ(toePads[1].POSITION_MATRIX, 0.5);  LIBS.rotateX(toePads[1].POSITION_MATRIX, LIBS.degToRad(-20));
+        LIBS.translateX(toePads[2].POSITION_MATRIX, 0.2);  LIBS.translateY(toePads[2].POSITION_MATRIX, -0.1); LIBS.translateZ(toePads[2].POSITION_MATRIX, 0.45); LIBS.rotateX(toePads[2].POSITION_MATRIX, LIBS.degToRad(-20));
 
         this.childs.push(base, mainPad, ...toePads);
 

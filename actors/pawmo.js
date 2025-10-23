@@ -89,8 +89,8 @@ export function createPawmo(animationLoop) {
     const Head = new pawmoHead(GL, SHADER_PROGRAM, _pos, _col, _Mmatrix, _normal, {});
 
     // ▼▼▼ DIUBAH: Gunakan positioning dari main.js lama ▼▼▼
-    LIBS.set_I4(Left_Hand.POSITION_MATRIX); LIBS.translateX(Left_Hand.POSITION_MATRIX, -1.5); LIBS.translateY(Left_Hand.POSITION_MATRIX, 0.7); LIBS.rotateZ(Left_Hand.POSITION_MATRIX, LIBS.degToRad(120)); LIBS.rotateY(Left_Hand.POSITION_MATRIX, LIBS.degToRad(20));
-    LIBS.set_I4(Right_Hand.POSITION_MATRIX); LIBS.translateX(Right_Hand.POSITION_MATRIX, 1.5); LIBS.translateY(Right_Hand.POSITION_MATRIX, 0.7); LIBS.rotateZ(Right_Hand.POSITION_MATRIX, LIBS.degToRad(-120)); LIBS.rotateY(Right_Hand.POSITION_MATRIX, LIBS.degToRad(-20));
+    LIBS.set_I4(Left_Hand.POSITION_MATRIX); LIBS.translateX(Left_Hand.POSITION_MATRIX, -1.35); LIBS.translateY(Left_Hand.POSITION_MATRIX, 0.7); LIBS.rotateZ(Left_Hand.POSITION_MATRIX, LIBS.degToRad(120)); LIBS.rotateY(Left_Hand.POSITION_MATRIX, LIBS.degToRad(20));
+    LIBS.set_I4(Right_Hand.POSITION_MATRIX); LIBS.translateX(Right_Hand.POSITION_MATRIX, 1.35); LIBS.translateY(Right_Hand.POSITION_MATRIX, 0.7); LIBS.rotateZ(Right_Hand.POSITION_MATRIX, LIBS.degToRad(-120)); LIBS.rotateY(Right_Hand.POSITION_MATRIX, LIBS.degToRad(-20));
     LIBS.set_I4(Left_Foot.POSITION_MATRIX); LIBS.translateX(Left_Foot.POSITION_MATRIX, -0.6); LIBS.translateY(Left_Foot.POSITION_MATRIX, -1.7); LIBS.translateZ(Left_Foot.POSITION_MATRIX, 0.4);
     LIBS.set_I4(Right_Foot.POSITION_MATRIX); LIBS.translateX(Right_Foot.POSITION_MATRIX, 0.6); LIBS.translateY(Right_Foot.POSITION_MATRIX, -1.7); LIBS.translateZ(Right_Foot.POSITION_MATRIX, 0.4);
     LIBS.set_I4(Tail.POSITION_MATRIX); LIBS.rotateY(Tail.POSITION_MATRIX, LIBS.degToRad(90)); LIBS.translateY(Tail.POSITION_MATRIX, -1.2); LIBS.translateZ(Tail.POSITION_MATRIX, -1.4);
@@ -113,7 +113,7 @@ export function createPawmo(animationLoop) {
 
     // Posisikan Aktor LOKAL di atas pulau
     LIBS.set_I4(PawmoRig.POSITION_MATRIX);
-    LIBS.translateY(PawmoRig.POSITION_MATRIX, 1.5);
+    LIBS.translateY(PawmoRig.POSITION_MATRIX, 1);
     LIBS.translateX(PawmoRig.POSITION_MATRIX, 0.5);
     LIBS.translateZ(PawmoRig.POSITION_MATRIX, 0.5);
     LIBS.scale(PawmoRig.POSITION_MATRIX, 0.2, 0.2, 0.2); 
