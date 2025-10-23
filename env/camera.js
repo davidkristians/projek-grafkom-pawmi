@@ -168,12 +168,12 @@ export class Camera {
         let moveZ = 0;
         if (this.keys['w']) {
             moveX += forwardX * moveSpeed;
-            moveY += forwardY * moveSpeed;
+            moveY -= forwardY * moveSpeed;
             moveZ += forwardZ * moveSpeed;
         }
         if (this.keys['s']) {
             moveX -= forwardX * moveSpeed;
-            moveY -= forwardY * moveSpeed;
+            moveY += forwardY * moveSpeed;
             moveZ -= forwardZ * moveSpeed;
         }
         if (this.keys['a']) {
