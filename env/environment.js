@@ -34,6 +34,7 @@ export class Environment {
         this.resizeCanvas(); // Panggil sekali saat setup
         this._setupShaders();
         this._setupCloudShaders();
+        this._setupWaterfallShader();
         this._getShaderLocations();
         this._createAllGeometry(); // Buat data geometri
         this._createAllBuffers();  // Buat buffer WebGL
@@ -229,6 +230,85 @@ export class Environment {
         this.globalApp.cloudProgram = cloudProgram;
     }
 
+    // Ganti fungsi lama di environment.js dengan yang ini:
+    // HAPUS FUNGSI LAMA, LALU PASTE YANG INI DI env/environment.js
+    _setupWaterfallShader() {
+        const gl = this.gl;
+
+        // --- Shader Air Terjun: Vertex Shader ---
+        const vsSource = `attribute vec4 aPosition;
+        attribute vec3 aColor;
+        attribute vec3 aNormal;
+        uniform mat4 uModelViewMatrix;
+        uniform mat4 uProjectionMatrix;
+        uniform float uTime;
+        varying vec3 vColor;
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        
+        void main() {
+            vec4 pos = aPosition;
+            
+            // Tambahkan animasi riak
+            pos.x += sin(pos.y * 2.5 + uTime * 5.0) * 0.08;
+            pos.z += cos(pos.y * 2.5 + uTime * 5.0) * 0.08;
+
+            // Hitung faktor lengkungan (bend)
+            float bendFactor = (pos.y / -2.5); // Asumsi tinggi air -2.5
+            bendFactor = pow(bendFactor, 2.0); 
+
+            // Terapkan lengkungan ke arah Z (ke depan)
+            float bendAmount = 1.0; 
+            pos.z += bendFactor * bendAmount;
+
+            gl_Position = uProjectionMatrix * uModelViewMatrix * pos;
+            vPosition = pos.xyz;
+            vNormal = normalize(aNormal);
+            vColor = aColor;
+        }`;
+        // --- Akhir Vertex Shader ---
+
+        // --- Shader Air Terjun: Fragment Shader ---
+        const fsSource = `precision highp float;
+        varying vec3 vColor;
+        varying vec3 vPosition;
+        varying vec3 vNormal;
+        uniform float uTime;
+
+        void main() {
+            float foam = sin(vPosition.y * 5.0 - uTime * 10.0) * 0.5 + 0.5;
+            foam = smoothstep(0.6, 1.0, foam) * 0.8;
+            vec3 foamColor = vec3(0.8, 0.9, 1.0) * foam;
+            vec3 finalColor = vColor + foamColor;
+            gl_FragColor = vec4(finalColor, 0.85);
+        }`;
+        // --- Akhir Fragment Shader ---
+
+        const vertexShader = this._createShader(gl.VERTEX_SHADER, vsSource);
+        const fragmentShader = this._createShader(gl.FRAGMENT_SHADER, fsSource);
+
+        if (!vertexShader || !fragmentShader) {
+            console.error("Waterfall shader creation failed."); return;
+        }
+
+        const program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            console.error('Waterfall shader program linking failed:', gl.getProgramInfoLog(program));
+            gl.deleteProgram(program);
+            this.waterfallProgram = null;
+            this.globalApp.waterfallProgram = null;
+            return;
+        }
+
+        this.waterfallProgram = program;
+        this.globalApp.waterfallProgram = program;
+        console.log("--- WATERFALL SHADER SUKSES DIBUAT ---");
+    }
+
     _getShaderLocations() {
         const gl = this.gl;
         // Lokasi Program Utama
@@ -255,12 +335,25 @@ export class Environment {
         } else {
             console.error("Cloud shader program not available for getting locations.");
         }
+
+        if (this.waterfallProgram) {
+            gl.useProgram(this.waterfallProgram);
+            // Simpan lokasi ke globalApp agar bisa diakses IslandNode
+            this.globalApp.wPosLoc = gl.getAttribLocation(this.waterfallProgram, 'aPosition');
+            this.globalApp.wColLoc = gl.getAttribLocation(this.waterfallProgram, 'aColor');
+            this.globalApp.wNormLoc = gl.getAttribLocation(this.waterfallProgram, 'aNormal');
+            this.globalApp.wMvLoc = gl.getUniformLocation(this.waterfallProgram, 'uModelViewMatrix');
+            this.globalApp.wProjLoc = gl.getUniformLocation(this.waterfallProgram, 'uProjectionMatrix');
+            this.globalApp.wTimeLoc = gl.getUniformLocation(this.waterfallProgram, 'uTime');
+        } else {
+            console.error("Waterfall shader program not available for getting locations.");
+        }
     }
 
     _createAllGeometry() {
         // Simpan semua data geometri mentah
         this.islandGeo = this._createHexagonIsland(2.5, 1.5);
-        this.treeTrunkGeo = this._createCurvedTrunk(1.2, 0.18, 0.08, 18, 0.3);
+        this.treeTrunkGeo = this._createCurvedTrunk(1.5, 0.18, 0.08, 18, 0.3);
         this.branchGeo = this._createBranch(0.45, 0.06, 12);
         this.leafSphere1Geo = this._createDetailedSphere(0.55, 28, [1.0, 0.72, 0.82], true);
         this.leafSphere2Geo = this._createDetailedSphere(0.45, 24, [0.98, 0.68, 0.78], true);
@@ -285,67 +378,99 @@ export class Environment {
 
     _setupScenePositions() {
         // Data posisi statis untuk panggung
-        this.treePositions = [ { pos: [-1.3, 0, -0.6], rotation: 0.2 }, { pos: [1.4, 0, -0.9], rotation: -0.3 }];
+        this.treePositions = [{ pos: [-1.3, 0, -0.6], rotation: 0.2 }, { pos: [1.4, 0, -0.9], rotation: -0.3 }];
         this.rockPositions = [
             { pos: [-1.6, 0, 0.9], scale: 1.1 },
             { pos: [1.5, 0, 0.6], scale: 0.9 }
             // Dua batu belakang sudah dihapus
         ];
-        this.globalApp.islandPositions = [ [-6, 0, 0], [0, 0, 0], [6, 0, 0] ];
+        this.globalApp.islandPositions = [[-6, 0, 0], [0, 0, 0], [6, 0, 0]];
     }
 
     // --- Fungsi Render Utama (Versi Scene Graph + Awan Statis) ---
-    render(viewMatrix, projectionMatrix) {
-        const gl = this.gl;
-        const camera = this.globalApp.camera;
+// env/environment.js
 
-        // 1. Setup Frame
-        gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.clearColor(0.53, 0.81, 0.92, 1.0); gl.clearDepth(1.0);
+    // --- Fungsi Render Utama (Versi Pulau = Awan) ---
+    render(viewMatrix, projectionMatrix) {
+        const gl = this.gl;
+        const camera = this.globalApp.camera;
 
-        // 2. Render Awan (jika program cloud ada dan kamera ada)
-        if (this.cloudProgram && this.cProjectionLocation && this.buffers.cloud && camera) {
-            gl.useProgram(this.cloudProgram);
-            gl.uniformMatrix4fv(this.cProjectionLocation, false, projectionMatrix);
+        // 1. Setup Frame
+        gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.clearColor(0.53, 0.81, 0.92, 1.0); gl.clearDepth(1.0);
 
-            gl.enable(gl.BLEND);
-            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-            gl.depthMask(false);
+        // ▼▼▼ BARU: Ambil matriks 'NoRotation' sekali di atas ▼▼▼
+        // Kita butuh ini untuk Awan dan Pulau
+        const viewMatrixNoRot = camera.getViewMatrixNoRotation();
+        
+        // ▲▲▲ SELESAI ▲▲▲
 
-            // Ambil view matrix TANPA rotasi
-            const viewMatrixNoRot = camera.getViewMatrixNoRotation();
+        // 2. Render Awan (jika program cloud ada dan kamera ada)
+        if (this.cloudProgram && this.cProjectionLocation && this.buffers.cloud && camera) {
+            gl.useProgram(this.cloudProgram);
+            gl.uniformMatrix4fv(this.cProjectionLocation, false, projectionMatrix);
 
-            if (this.globalApp.cloudSystem && this.globalApp.cloudSystem.clouds) {
-                for (const cloudData of this.globalApp.cloudSystem.clouds) {
-                    let cloudMv = LIBS.get_I4();
-                    // Kalikan dengan view matrix TANPA rotasi
-                    LIBS.mul(cloudMv, viewMatrixNoRot, cloudMv);
-                    // Terapkan transformasi lokal awan
-                    LIBS.translateX(cloudMv, cloudData.x);
-                    LIBS.translateY(cloudMv, cloudData.y);
-                    LIBS.translateZ(cloudMv, cloudData.z);
-                    LIBS.rotateY(cloudMv, cloudData.rotY);
-                    LIBS.scale(cloudMv, cloudData.size, cloudData.size * 0.6, cloudData.size * 0.9);
-                    this._drawCloud(this.buffers.cloud, cloudMv);
-                }
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+            gl.depthMask(false);
+
+            // (viewMatrixNoRot sudah diambil di atas)
+
+            if (this.globalApp.cloudSystem && this.globalApp.cloudSystem.clouds) {
+                for (const cloudData of this.globalApp.cloudSystem.clouds) {
+                    let cloudMv = LIBS.get_I4();
+                    // Kalikan dengan view matrix TANPA rotasi
+                    LIBS.mul(cloudMv, viewMatrixNoRot, cloudMv);
+                    // Terapkan transformasi lokal awan
+                    LIBS.translateX(cloudMv, cloudData.x);
+                    LIBS.translateY(cloudMv, cloudData.y);
+                    LIBS.translateZ(cloudMv, cloudData.z);
+                    LIBS.rotateY(cloudMv, cloudData.rotY);
+                    LIBS.scale(cloudMv, cloudData.size, cloudData.size * 0.6, cloudData.size * 0.9);
+                    this._drawCloud(this.buffers.cloud, cloudMv);
+                }
+            }
+
+            gl.depthMask(true);
+            gl.disable(gl.BLEND);
+        }
+
+        // 3. Render Scene Graph & Pulau
+        if (this.mainProgram && this.globalApp.projLoc && this.globalApp.actors) {
+            gl.useProgram(this.mainProgram);
+            gl.uniformMatrix4fv(this.globalApp.projLoc, false, projectionMatrix);
+
+            // ▼▼▼ BARU: Bagian 3.1 - Render Pulau (seperti awan) ▼▼▼
+            // Kita render pulau-pulau di sini secara manual, menggunakan
+            // data posisi dari 'this.globalApp.islandPositions'
+            // dan matriks 'viewMatrixNoRot'.
+            if (this.globalApp.islandPositions && this.buffers.island) {
+                // for (const pos of this.globalApp.islandPositions) {
+                //     let islandMv = LIBS.get_I4();
+                    
+                //     // Kalikan dengan view matrix TANPA rotasi (LOGIKA AWAN)
+                //     LIBS.mul(islandMv, viewMatrixNoRot, islandMv);
+                    
+                //     // Terapkan transformasi lokal (posisi)
+                //     LIBS.translateX(islandMv, pos[0]);
+                //     LIBS.translateY(islandMv, pos[1]);
+                //     LIBS.translateZ(islandMv, pos[2]);
+                    
+                //     // Gambar pulau menggunakan draw function yang normal (bukan _drawCloud)
+                //     this._drawObject(this.buffers.island, islandMv);
+                // }
             }
+            // ▲▲▲ SELESAI ▲▲▲
 
-            gl.depthMask(true);
-            gl.disable(gl.BLEND);
-        }
-
-        // 3. Render Scene Graph (jika program utama ada)
-        if (this.mainProgram && this.globalApp.projLoc && this.globalApp.actors) {
-            gl.useProgram(this.mainProgram);
-            gl.uniformMatrix4fv(this.globalApp.projLoc, false, projectionMatrix);
-
-            // Render scene graph menggunakan viewMatrix BIASA
-            for (const actor of this.globalApp.actors) {
-                actor.render(viewMatrix);
-            }
-        }
-    }
+            // ▼▼▼ DIUBAH: Bagian 3.2 - Render Sisa Scene Graph (Pohon, Batu, Pawmi, dll) ▼▼▼
+            // Render scene graph menggunakan viewMatrix BIASA (DENGAN rotasi)
+            // PENTING: Pastikan 'IslandNode' tidak ada lagi di dalam 'this.globalApp.actors'
+            for (const actor of this.globalApp.actors) {
+                actor.render(viewMatrix);
+            }
+        }
+    }
 
     // --- Fungsi Helper Draw ---
     _drawCloud(bufferSet, modelViewMatrix) {
@@ -434,6 +559,7 @@ export class Environment {
     _createCurvedTrunk(height, baseRadius, topRadius, segments, curveAmount) { const vertices = []; const colors = []; const normals = []; const indices = []; const heightSegments = 20; const radialSegments = segments; for (let h = 0; h <= heightSegments; h++) { const v = h / heightSegments; const y = v * height; const curveX = Math.sin(v * Math.PI * 1.2) * curveAmount; const curveZ = Math.cos(v * Math.PI * 2.5) * curveAmount * 0.4; const radius = baseRadius + (topRadius - baseRadius) * v; for (let r = 0; r <= radialSegments; r++) { const u = r / radialSegments; const theta = u * Math.PI * 2; const barkNoise = Math.sin(theta * 8 + v * 12) * 0.015; const finalRadius = radius + barkNoise; const x = Math.cos(theta) * finalRadius + curveX; const z = Math.sin(theta) * finalRadius + curveZ; vertices.push(x, y, z); const nx = Math.cos(theta); const nz = Math.sin(theta); normals.push(nx, 0, nz); const colorVar = 0.8 + Math.sin(theta * 5 + v * 10) * 0.2; const darken = 0.88 + v * 0.12; colors.push(0.36 * colorVar * darken, 0.23 * colorVar * darken, 0.13 * colorVar * darken); } } for (let h = 0; h < heightSegments; h++) { for (let r = 0; r < radialSegments; r++) { const current = h * (radialSegments + 1) + r; const next = current + radialSegments + 1; indices.push(current, next, current + 1); indices.push(current + 1, next, next + 1); } } return { vertices: new Float32Array(vertices), colors: new Float32Array(colors), normals: new Float32Array(normals), indices: new Uint16Array(indices) }; }
     _createBranch(length, radius, segments) { const vertices = []; const colors = []; const normals = []; const indices = []; const heightSegments = 10; const radialSegments = segments; for (let h = 0; h <= heightSegments; h++) { const v = h / heightSegments; const y = v * length; const currentRadius = radius * (1 - v * 0.6); const bendX = v * v * 0.1; for (let r = 0; r <= radialSegments; r++) { const u = r / radialSegments; const theta = u * Math.PI * 2; const x = Math.cos(theta) * currentRadius + bendX; const z = Math.sin(theta) * currentRadius; vertices.push(x, y, z); normals.push(Math.cos(theta), 0, Math.sin(theta)); const colorVar = 0.85 + Math.sin(theta * 3) * 0.15; colors.push(0.33 * colorVar, 0.21 * colorVar, 0.11 * colorVar); } } for (let h = 0; h < heightSegments; h++) { for (let r = 0; r < radialSegments; r++) { const current = h * (radialSegments + 1) + r; const next = current + radialSegments + 1; indices.push(current, next, current + 1); indices.push(current + 1, next, next + 1); } } return { vertices: new Float32Array(vertices), colors: new Float32Array(colors), normals: new Float32Array(normals), indices: new Uint16Array(indices) }; }
     _createHexagonIsland(size, height) { const vertices = []; const colors = []; const normals = []; const indices = []; const topGrassColor = [0.68, 0.84, 0.37]; const sideSoilColor = [0.57, 0.44, 0.30]; const rockTopColor = [0.47, 0.37, 0.30]; const rockMidColor = [0.40, 0.32, 0.27]; const rockBottomColor = [0.32, 0.30, 0.32]; const rockDarkColor = [0.27, 0.25, 0.27]; const topCenter = vertices.length / 3; vertices.push(0, height / 2, 0); colors.push(...topGrassColor); normals.push(0, 1, 0); for (let i = 0; i <= 6; i++) { const angle = (i / 6) * Math.PI * 2; const x = Math.cos(angle) * size; const z = Math.sin(angle) * size; vertices.push(x, height / 2, z); colors.push(...topGrassColor); normals.push(0, 1, 0); } const soilStart = vertices.length / 3; for (let i = 0; i <= 6; i++) { const angle = (i / 6) * Math.PI * 2; const x = Math.cos(angle) * size; const z = Math.sin(angle) * size; vertices.push(x, height / 2 - 0.15, z); colors.push(...sideSoilColor); const nx = Math.cos(angle); const nz = Math.sin(angle); normals.push(nx, 0, nz); } const layers = [{ y: height / 2 - 0.15, scale: 0.95, color: rockTopColor }, { y: height / 4, scale: 0.85, color: rockMidColor }, { y: 0, scale: 0.70, color: rockMidColor }, { y: -height / 4, scale: 0.55, color: rockBottomColor }, { y: -height / 2 + 0.3, scale: 0.40, color: rockDarkColor }, { y: -height / 2, scale: 0.25, color: rockDarkColor }]; const layerStarts = []; layers.forEach((layer, layerIdx) => { const startIdx = vertices.length / 3; layerStarts.push(startIdx); const segments = 8; for (let i = 0; i <= segments; i++) { const angle = (i / segments) * Math.PI * 2; const randomOffset = (Math.sin(angle * 3 + layerIdx) * 0.1 + Math.cos(angle * 5) * 0.08) * layer.scale; const finalScale = layer.scale + randomOffset; const x = Math.cos(angle) * size * finalScale; const z = Math.sin(angle) * size * finalScale; vertices.push(x, layer.y, z); const colorVar = 0.92 + Math.random() * 0.16; colors.push(layer.color[0] * colorVar, layer.color[1] * colorVar, layer.color[2] * colorVar); const nx = Math.cos(angle); const nz = Math.sin(angle); normals.push(nx, -0.3, nz); } }); const bottomTip = vertices.length / 3; vertices.push(0, -height / 2 - 0.2, 0); colors.push(...rockDarkColor); normals.push(0, -1, 0); for (let i = 1; i <= 6; i++) { indices.push(topCenter, i, i + 1); } const grassEdgeStart = 1; for (let i = 0; i < 6; i++) { const t1 = grassEdgeStart + i; const t2 = grassEdgeStart + i + 1; const b1 = soilStart + i; const b2 = soilStart + i + 1; indices.push(t1, b1, t2); indices.push(t2, b1, b2); } const firstRockStart = layerStarts[0]; for (let i = 0; i < 7; i++) { const s1 = soilStart + i; const s2 = soilStart + i + 1; const r1 = firstRockStart + i; const r2 = firstRockStart + i + 1; indices.push(s1, r1, s2); indices.push(s2, r1, r2); } for (let layer = 0; layer < layerStarts.length - 1; layer++) { const currentStart = layerStarts[layer]; const nextStart = layerStarts[layer + 1]; const segments = 8; for (let i = 0; i < segments; i++) { const c1 = currentStart + i; const c2 = currentStart + i + 1; const n1 = nextStart + i; const n2 = nextStart + i + 1; indices.push(c1, n1, c2); indices.push(c2, n1, n2); } } const lastLayerStart = layerStarts[layerStarts.length - 1]; for (let i = 0; i < 8; i++) { const l1 = lastLayerStart + i; const l2 = lastLayerStart + i + 1; indices.push(l1, bottomTip, l2); } return { vertices: new Float32Array(vertices), colors: new Float32Array(colors), normals: new Float32Array(normals), indices: new Uint16Array(indices) }; }
+    
     _createCloud(size) { const vertices = []; const colors = []; const normals = []; const indices = []; const cloudColorTop = [0.98, 0.99, 1.0]; const cloudColorMid = [0.94, 0.96, 0.98]; const cloudColorBottom = [0.82, 0.86, 0.92]; const spheres = [{ x: 0, y: 0, z: 0, r: size * 1.5 }, { x: -size * 1.2, y: -0.05, z: 0.1, r: size * 1.0 }, { x: -size * 2.0, y: -0.1, z: -0.05, r: size * 0.75 }, { x: -size * 2.6, y: 0.05, z: 0, r: size * 0.5 }, { x: size * 1.3, y: 0, z: -0.1, r: size * 1.1 }, { x: size * 2.2, y: -0.08, z: 0.05, r: size * 0.8 }, { x: size * 2.8, y: 0.1, z: 0, r: size * 0.45 }, { x: -size * 0.8, y: 0.55, z: 0, r: size * 0.7 }, { x: size * 0.5, y: 0.6, z: -0.05, r: size * 0.65 }, { x: -size * 1.6, y: 0.45, z: 0.08, r: size * 0.55 }, { x: size * 1.5, y: 0.5, z: 0.1, r: size * 0.6 }, { x: -size * 0.5, y: -0.35, z: 0, r: size * 0.85 }, { x: size * 0.6, y: -0.3, z: 0, r: size * 0.8 }, { x: size * 1.8, y: -0.25, z: 0, r: size * 0.6 }, { x: -size * 1.5, y: -0.3, z: 0, r: size * 0.7 }, { x: -size * 0.2, y: 0.75, z: 0.05, r: size * 0.4 }, { x: size * 0.9, y: 0.7, z: -0.08, r: size * 0.35 }, { x: -size * 2.3, y: 0.3, z: 0, r: size * 0.42 }, { x: size * 2.5, y: 0.35, z: 0, r: size * 0.38 }]; spheres.forEach(sphere => { const segments = 16; const startVertex = vertices.length / 3; for (let lat = 0; lat <= segments; lat++) { const theta = lat * Math.PI / segments; const sinTheta = Math.sin(theta); const cosTheta = Math.cos(theta); for (let lon = 0; lon <= segments; lon++) { const phi = lon * 2 * Math.PI / segments; const sinPhi = Math.sin(phi); const cosPhi = Math.cos(phi); const x = cosPhi * sinTheta; const y = cosTheta; const z = sinPhi * sinTheta; const deform = 1.0 + Math.sin(phi * 2.5) * Math.cos(theta * 1.8) * 0.08; const vx = sphere.x + sphere.r * x * deform; const vy = sphere.y + sphere.r * y * deform; const vz = sphere.z + sphere.r * z * deform; vertices.push(vx, vy, vz); normals.push(x, y, z); const worldY = vy; let finalColor; if (worldY > 0.4) { const t = (worldY - 0.4) / 0.6; finalColor = [cloudColorMid[0] + (cloudColorTop[0] - cloudColorMid[0]) * t, cloudColorMid[1] + (cloudColorTop[1] - cloudColorMid[1]) * t, cloudColorMid[2] + (cloudColorTop[2] - cloudColorMid[2]) * t]; } else if (worldY > -0.2) { finalColor = [...cloudColorMid]; } else { const t = (worldY + 0.5) / 0.3; const clampedT = Math.max(0, Math.min(1, t)); finalColor = [cloudColorBottom[0] + (cloudColorMid[0] - cloudColorBottom[0]) * clampedT, cloudColorBottom[1] + (cloudColorMid[1] - cloudColorBottom[1]) * clampedT, cloudColorBottom[2] + (cloudColorMid[2] - cloudColorBottom[2]) * clampedT]; } const colorVar = 0.99 + Math.random() * 0.02; colors.push(finalColor[0] * colorVar, finalColor[1] * colorVar, finalColor[2] * colorVar); } } for (let lat = 0; lat < segments; lat++) { for (let lon = 0; lon < segments; lon++) { const first = startVertex + lat * (segments + 1) + lon; const second = first + segments + 1; indices.push(first, second, first + 1); indices.push(second, second + 1, first + 1); } } }); return { vertices: new Float32Array(vertices), colors: new Float32Array(colors), normals: new Float32Array(normals), indices: new Uint16Array(indices) }; }
 
     _createBuffers(geometry) {

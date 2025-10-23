@@ -90,7 +90,7 @@ export class pawmoHead extends group {
         // Ear Bulb Kiri (Paraboloid) - Gunakan posisi lama, sesuaikan jika perlu
         LIBS.set_I4(leftEarBulb.POSITION_MATRIX);
         LIBS.translateX(leftEarBulb.POSITION_MATRIX, -0.70);
-        LIBS.translateY(leftEarBulb.POSITION_MATRIX, 0.3);
+        LIBS.translateY(leftEarBulb.POSITION_MATRIX, 0.4);
         LIBS.translateZ(leftEarBulb.POSITION_MATRIX, 1.1);
         LIBS.rotateY(leftEarBulb.POSITION_MATRIX, LIBS.degToRad(0));
         LIBS.rotateX(leftEarBulb.POSITION_MATRIX, LIBS.degToRad(-170));
@@ -115,7 +115,7 @@ export class pawmoHead extends group {
         // Ear Bulb Kanan (Paraboloid) - Gunakan posisi lama, sesuaikan jika perlu
         LIBS.set_I4(rightEarBulb.POSITION_MATRIX);
         LIBS.translateX(rightEarBulb.POSITION_MATRIX, 0.70);
-        LIBS.translateY(rightEarBulb.POSITION_MATRIX, 0.3);
+        LIBS.translateY(rightEarBulb.POSITION_MATRIX, 0.4);
         LIBS.translateZ(rightEarBulb.POSITION_MATRIX, 1.1);
         LIBS.rotateY(rightEarBulb.POSITION_MATRIX, LIBS.degToRad(0));
         LIBS.rotateX(rightEarBulb.POSITION_MATRIX, LIBS.degToRad(-170));
@@ -125,7 +125,14 @@ export class pawmoHead extends group {
         LIBS.translateLocal(rightEarBulb.POSITION_MATRIX, -0.15, -0.5, 0.4);
 
         // Posisi Jambul (Tetap Sama)
-        LIBS.set_I4(headTuft.POSITION_MATRIX); LIBS.translateX(headTuft.POSITION_MATRIX, 0); LIBS.translateY(headTuft.POSITION_MATRIX, 1); LIBS.translateZ(headTuft.POSITION_MATRIX, 0.6); LIBS.rotateX(headTuft.POSITION_MATRIX, LIBS.degToRad(30)); LIBS.rotateY(headTuft.POSITION_MATRIX, LIBS.degToRad(10)); LIBS.rotateZ(headTuft.POSITION_MATRIX, LIBS.degToRad(0));
+        LIBS.set_I4(headTuft.POSITION_MATRIX);
+        LIBS.translateX(headTuft.POSITION_MATRIX, 0);
+        LIBS.translateY(headTuft.POSITION_MATRIX, 1);
+        LIBS.translateZ(headTuft.POSITION_MATRIX, 0.6);
+        LIBS.rotateX(headTuft.POSITION_MATRIX, LIBS.degToRad(30));
+        LIBS.rotateY(headTuft.POSITION_MATRIX, LIBS.degToRad(50));
+        LIBS.rotateZ(headTuft.POSITION_MATRIX, LIBS.degToRad(0));
+
 
         // --- 4. Menambahkan Anak ke Grup Kepala ---
         this.childs.push(

@@ -14,6 +14,7 @@ import { cone } from "../geometry3/cone.js";
 import { pawmotFoot } from "../geometry3/pawmot-foot.js";
 // ▼▼▼ BARU: Import Ruff ▼▼▼
 import { pawmotRuff, RuffSpike } from "../geometry3/pawmot-ruff.js";
+import { pawmotTuft } from "../geometry3/pawmot-tuft.js"; // Asumsi lokasi file
 
 // Fungsi patchRenderPrototype
 function patchRenderPrototype(proto, normMatLoc) {
@@ -54,6 +55,7 @@ export function createPawmot(animationLoop) {
     patchRenderPrototype(PawmoArm.prototype, _NMatrixLoc);
     patchRenderPrototype(pawmotTorso.prototype, _NMatrixLoc); // BARU: Patch Torso
     patchRenderPrototype(RuffSpike.prototype, _NMatrixLoc); // BARU: Patch RuffSpike
+    patchRenderPrototype(pawmotTuft.prototype, _NMatrixLoc); // <-- BARU: Patch Tuft
 
     // Definisi Warna
     const PAWMOT_ORANGE_LIGHT = [240 / 255, 150 / 255, 50 / 255];
@@ -73,15 +75,16 @@ export function createPawmot(animationLoop) {
     const Ruff = new pawmotRuff(GL, SHADER_PROGRAM, _pos, _col, _normal, _Mmatrix, { color: PAWMOT_ORANGE_LIGHT });
 
     // Pemosisian Objek Relatif
+    LIBS.set_I4(Torso.POSITION_MATRIX); LIBS.translateY(Torso.POSITION_MATRIX, 0.4)
     LIBS.set_I4(Left_Hand.POSITION_MATRIX); LIBS.translateX(Left_Hand.POSITION_MATRIX, -1); LIBS.translateY(Left_Hand.POSITION_MATRIX, 1); LIBS.translateZ(Left_Hand.POSITION_MATRIX, 0.5); LIBS.rotateX(Left_Hand.POSITION_MATRIX, LIBS.degToRad(50)); LIBS.rotateZ(Left_Hand.POSITION_MATRIX, LIBS.degToRad(180)); LIBS.rotateY(Left_Hand.POSITION_MATRIX, LIBS.degToRad(-15));
     LIBS.set_I4(Right_Hand.POSITION_MATRIX); LIBS.translateX(Right_Hand.POSITION_MATRIX, 1); LIBS.translateY(Right_Hand.POSITION_MATRIX, 1); LIBS.translateZ(Right_Hand.POSITION_MATRIX, 0.5); LIBS.rotateX(Right_Hand.POSITION_MATRIX, LIBS.degToRad(50)); LIBS.rotateZ(Right_Hand.POSITION_MATRIX, LIBS.degToRad(180)); LIBS.rotateY(Right_Hand.POSITION_MATRIX, LIBS.degToRad(15));
-    LIBS.set_I4(Left_Foot.POSITION_MATRIX); LIBS.scale(Left_Foot.POSITION_MATRIX, 0.65, 0.65, 0.65); LIBS.translateX(Left_Foot.POSITION_MATRIX, -0.5); LIBS.translateY(Left_Foot.POSITION_MATRIX, -1.65); LIBS.translateZ(Left_Foot.POSITION_MATRIX, 0.2); LIBS.rotateX(Left_Foot.POSITION_MATRIX, LIBS.degToRad(10));
-    LIBS.set_I4(Right_Foot.POSITION_MATRIX); LIBS.scale(Right_Foot.POSITION_MATRIX, 0.65, 0.65, 0.65); LIBS.translateX(Right_Foot.POSITION_MATRIX, 0.5); LIBS.translateY(Right_Foot.POSITION_MATRIX, -1.65); LIBS.translateZ(Right_Foot.POSITION_MATRIX, 0.2); LIBS.rotateX(Right_Foot.POSITION_MATRIX, LIBS.degToRad(10));
+    LIBS.set_I4(Left_Foot.POSITION_MATRIX); LIBS.scale(Left_Foot.POSITION_MATRIX, 0.65, 0.65, 0.65); LIBS.translateX(Left_Foot.POSITION_MATRIX, -0.5); LIBS.translateY(Left_Foot.POSITION_MATRIX, -1.65); LIBS.translateZ(Left_Foot.POSITION_MATRIX, 0.2); LIBS.rotateX(Left_Foot.POSITION_MATRIX, LIBS.degToRad(-10));
+    LIBS.set_I4(Right_Foot.POSITION_MATRIX); LIBS.scale(Right_Foot.POSITION_MATRIX, 0.65, 0.65, 0.65); LIBS.translateX(Right_Foot.POSITION_MATRIX, 0.5); LIBS.translateY(Right_Foot.POSITION_MATRIX, -1.65); LIBS.translateZ(Right_Foot.POSITION_MATRIX, 0.2); LIBS.rotateX(Right_Foot.POSITION_MATRIX, LIBS.degToRad(-10));
     LIBS.set_I4(Tail.POSITION_MATRIX); LIBS.rotateY(Tail.POSITION_MATRIX, LIBS.degToRad(90)); LIBS.translateY(Tail.POSITION_MATRIX, -1.2); LIBS.translateZ(Tail.POSITION_MATRIX, -1.4);
-    
+
     // PERBAIKAN: Posisi kepala manual karena torso tidak punya getTopMatrix()
     LIBS.set_I4(Head.POSITION_MATRIX);
-    LIBS.translateY(Head.POSITION_MATRIX, 2.1); // Sesuaikan dengan tinggi torso
+    LIBS.translateY(Head.POSITION_MATRIX, 2.4); // Sesuaikan dengan tinggi torso
     LIBS.rotateX(Head.POSITION_MATRIX, LIBS.degToRad(-10));
 
     // BARU: Posisi Ruff di leher
@@ -90,7 +93,7 @@ export function createPawmot(animationLoop) {
 
     // Penggabungan Rig
     PawmotRig.childs.push(Torso, Left_Hand, Right_Hand, Left_Foot, Right_Foot, Tail, Head, Ruff);
-    Torso.childs.push(Left_Hand, Right_Hand);
+    // Torso.childs.push(Left_Hand, Right_Hand);
 
     // Simpan Referensi Animasi
     PawmotRig.torsoRef = Torso;
@@ -100,6 +103,7 @@ export function createPawmot(animationLoop) {
     PawmotRig.rightHandMove = Right_Hand.MOVE_MATRIX;
     PawmotRig.headMove = Head.MOVE_MATRIX;
     PawmotRig.ruffRef = Ruff;
+    PawmotRig.tuftRef = Head.tuftRef; // <-- BARU: Simpan referensi jambul
 
     // Setup buffer
     PawmotRig.setup();
