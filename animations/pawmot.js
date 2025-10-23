@@ -61,8 +61,8 @@ export function animatePawmot(actor, time, deltaTime) {
 
         // 4. TRANSLASI UNTUK MENGHINDARI TEMBUS BADAN (CLIPPING)
         LIBS.translateZ(actor.tailRef.MOVE_MATRIX, TAIL_OFFSET_Z + -0.36);
-        LIBS.translateY(actor.tailRef.MOVE_MATRIX, TAIL_OFFSET_Y);
-        LIBS.translateX(actor.tailRef.MOVE_MATRIX, -0.3); // Tidak ada offset pada sumbu X
+        LIBS.translateY(actor.tailRef.MOVE_MATRIX, TAIL_OFFSET_Y+ 0.18);
+        LIBS.translateX(actor.tailRef.MOVE_MATRIX, 0); // Tidak ada offset pada sumbu X
     }
 
     // Animasi Mulut
