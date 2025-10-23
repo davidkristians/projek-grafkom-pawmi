@@ -15,6 +15,7 @@ import { pawmotFoot } from "../geometry3/pawmot-foot.js";
 // ▼▼▼ BARU: Import Ruff ▼▼▼
 import { pawmotRuff, RuffSpike } from "../geometry3/pawmot-ruff.js";
 import { pawmotTuft } from "../geometry3/pawmot-tuft.js"; // Asumsi lokasi file
+import { paraboloid } from "../geometry3/paraboloid.js"; // Butuh untuk pawmot-foot
 
 // Fungsi patchRenderPrototype
 function patchRenderPrototype(proto, normMatLoc) {
@@ -115,7 +116,7 @@ export function createPawmot(animationLoop) {
 
     // ▼▼▼ BARU: Tambahkan state untuk gerakan wandering ▼▼▼
     PawmotRig.movementState = {
-        baseY: 1.1,       // Simpan Y-offset awal
+        baseY: 1.38,       // Simpan Y-offset awal
         baseScale: 0.2,   // Simpan skala awal
         currentX: 0,      // Posisi X saat ini (relatif ke pusat pulau)
         currentZ: 0,      // Posisi Z saat ini

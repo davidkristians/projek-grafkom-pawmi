@@ -25,6 +25,13 @@ const PAWMOT_TUFT_SPEED = 2.0; // Kecepatan lambat seperti angin sepoi-sepoi
 const PAWMOT_TUFT_AMPLITUDE = LIBS.degToRad(15); // Ayunan 15 derajat ke setiap sisi
 const PAWMOT_TUFT_OFFSET_FACTOR = 0.8; // Faktor 'bergantian' antar helai
 
+const TAIL_SPIN_SPEED = 3.5;
+const TAIL_TILT_ANGLE = LIBS.degToRad(20);
+const MAX_ANGLE = 2 * Math.PI; // Digunakan untuk modulo rotasi
+const NEW_PAWMOT_TAIL_AMOUNT = 0.9; // Ambil nilai 0.9 dari kode yang Anda berikan
+// --- KONSTANTA TRANSLASI BARU UNTUK MENGHINDARI CLIPPING ---
+const TAIL_OFFSET_Z = 0.2; // Pindahkan ekor 0.1 unit ke belakang (menjauhi badan)
+const TAIL_OFFSET_Y = 0.2; // Pindahkan ekor 0.15 unit ke bawah
 
 // Fungsi animasi Pawmot
 export function animatePawmot(actor, time, deltaTime) {
@@ -33,9 +40,29 @@ export function animatePawmot(actor, time, deltaTime) {
 
     // Animasi Ekor
     if (actor.tailRef) {
-        const tailRotation = Math.sin(time * PAWMOT_TAIL_SPEED) * PAWMOT_TAIL_AMOUNT;
+        // Rotasi ayunan (swing) pada sumbu Z, menggunakan PAWMOT_TAIL_SPEED/NEW_PAWMOT_TAIL_AMOUNT
+        const tailRotationZ = Math.sin(time * PAWMOT_TAIL_SPEED) * NEW_PAWMOT_TAIL_AMOUNT;
+
+        // Rotasi berkelanjutan (spin) pada sumbu X
+        const tailRotationX = (time * TAIL_SPIN_SPEED) % MAX_ANGLE;
+
         LIBS.set_I4(actor.tailRef.MOVE_MATRIX);
-        LIBS.rotateZ(actor.tailRef.MOVE_MATRIX, tailRotation);
+
+        // 1. Rotasi Berkelanjutan (Putaran Penuh) pada Sumbu X
+        // CATATAN: Rotasi berkelanjutan (spin) dipasang di X, bukan Y seperti komentar Pawmi Anda
+        LIBS.rotateX(actor.tailRef.MOVE_MATRIX, tailRotationX);
+
+        // 2. Miringkan ekor (Kemiringan Statis)
+        // Kita gunakan Rotasi Sumbu Y untuk kemiringan statis, sesuai TAIL_TILT_ANGLE
+        LIBS.rotateY(actor.tailRef.MOVE_MATRIX, TAIL_TILT_ANGLE);
+
+        // 3. Rotasi Ayunan (Swing) pada Sumbu Z
+        LIBS.rotateZ(actor.tailRef.MOVE_MATRIX, tailRotationZ);
+
+        // 4. TRANSLASI UNTUK MENGHINDARI TEMBUS BADAN (CLIPPING)
+        LIBS.translateZ(actor.tailRef.MOVE_MATRIX, TAIL_OFFSET_Z + -0.36);
+        LIBS.translateY(actor.tailRef.MOVE_MATRIX, TAIL_OFFSET_Y);
+        LIBS.translateX(actor.tailRef.MOVE_MATRIX, -0.3); // Tidak ada offset pada sumbu X
     }
 
     // Animasi Mulut
@@ -74,20 +101,20 @@ export function animatePawmot(actor, time, deltaTime) {
     // --- LOGIKA ANIMASI RUFF (DIPERBARUI) ---
     if (actor.ruffRef && actor.ruffRef.childs && actor.ruffRef.childs.length > 0) {
         const ruffSpikes = actor.ruffRef.childs;
-        
+
         for (let i = 0; i < ruffSpikes.length; i++) {
             const spike = ruffSpikes[i];
-            
+
             // 1. Buat gelombang sinus yang unik untuk setiap spike
             const timeOffset = (time * PAWMOT_RUFF_SPEED) + (i * PAWMOT_RUFF_OFFSET_FACTOR);
             // sinRuff akan bernilai antara -1 dan 1
-            const sinRuff = Math.sin(timeOffset); 
-            
+            const sinRuff = Math.sin(timeOffset);
+
             // --- Logika Skala (Besar-Kecil) ---
             // 2a. Ubah rentang sin (-1 s/d 1) menjadi rentang skala (MIN s/d MAX)
             const scaleT = (sinRuff + 1) / 2; // Ini memberi nilai dari 0 s/d 1
             const currentScale = PAWMOT_RUFF_SCALE_MIN + (PAWMOT_RUFF_SCALE_MAX - PAWMOT_RUFF_SCALE_MIN) * scaleT;
-            
+
             // --- Logika Translasi (Naik-Turun) ---
             // 2b. Gunakan sinRuff (-1 s/d 1) untuk menentukan posisi Y
             const currentTranslateY = sinRuff * PAWMOT_RUFF_TRANS_AMPLITUDE;
@@ -102,24 +129,24 @@ export function animatePawmot(actor, time, deltaTime) {
     }
 
     // ▼▼▼ LOGIKA ANIMASI JAMBUL (TUFT) ▼▼▼
-    if (actor.tuftRef && actor.tuftRef.childs && actor.tuftRef.childs.length > 0) {
-        const tuftSpikes = actor.tuftRef.childs;
-        
-        for (let i = 0; i < tuftSpikes.length; i++) {
-            const spike = tuftSpikes[i];
-            
-            // 1. Buat gelombang sinus yang unik untuk setiap helai jambul
-            const timeOffset = (time * PAWMOT_TUFT_SPEED) + (i * PAWMOT_TUFT_OFFSET_FACTOR);
-            const sinTuft = Math.sin(timeOffset); // Nilai berayun antara -1 dan 1
-            
-            // 2. Ubah nilai sinus menjadi rotasi (ayunan kanan-kiri)
-            const currentRotationZ = sinTuft * PAWMOT_TUFT_AMPLITUDE;
+    if (actor.tuftRef && actor.tuftRef.childs && actor.tuftRef.childs.length > 0) {
+        const tuftSpikes = actor.tuftRef.childs;
 
-            // 3. Terapkan rotasi
-            LIBS.set_I4(spike.MOVE_MATRIX); // Reset matriks gerak
-            LIBS.rotateZ(spike.MOVE_MATRIX, currentRotationZ);
-        }
-    }
+        for (let i = 0; i < tuftSpikes.length; i++) {
+            const spike = tuftSpikes[i];
+
+            // 1. Buat gelombang sinus yang unik untuk setiap helai jambul
+            const timeOffset = (time * PAWMOT_TUFT_SPEED) + (i * PAWMOT_TUFT_OFFSET_FACTOR);
+            const sinTuft = Math.sin(timeOffset); // Nilai berayun antara -1 dan 1
+
+            // 2. Ubah nilai sinus menjadi rotasi (ayunan kanan-kiri)
+            const currentRotationZ = sinTuft * PAWMOT_TUFT_AMPLITUDE;
+
+            // 3. Terapkan rotasi
+            LIBS.set_I4(spike.MOVE_MATRIX); // Reset matriks gerak
+            LIBS.rotateZ(spike.MOVE_MATRIX, currentRotationZ);
+        }
+    }
 
     // ▼▼▼ GANTI SEMUA BLOK WANDERING LAMA DENGAN VERSI FINAL INI ▼▼▼
     if (actor.movementState) {
@@ -127,7 +154,7 @@ export function animatePawmot(actor, time, deltaTime) {
         const M = actor.POSITION_MATRIX;
 
         // --- 1. STATE LOGIC (Prioritas: Pause > Evade > Seek > Wander) ---
-        
+
         if (state.isPausing) {
             // --- STATE: PAUSING ---
             // Diam di tempat.
@@ -145,11 +172,11 @@ export function animatePawmot(actor, time, deltaTime) {
                 state.isEvading = false;
                 state.timeToNextChange = 0; // Selesai menghindar, cari target baru
             }
-        
+
         } else if (state.isSeekingCenter) {
             // --- STATE: SEEKING CENTER ---
             // Berjalan menuju titik (0,0).
-            
+
             // Cek jarak ke pusat
             const centerDist = Math.sqrt(state.currentX * state.currentX + state.currentZ * state.currentZ);
             const pauseStopRadius = 0.1; // Radius "tengah" (sangat kecil)
@@ -189,7 +216,7 @@ export function animatePawmot(actor, time, deltaTime) {
 
         // --- 2. MOVEMENT LOGIC (HANYA JALAN JIKA TIDAK PAUSING) ---
         if (!state.isPausing) {
-            
+
             // --- 2a. Belok Mulus ---
             let angleDiff = state.targetFacingAngle - state.currentFacingAngle;
             while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
@@ -232,13 +259,13 @@ export function animatePawmot(actor, time, deltaTime) {
                     // BARU NABRAK! (Saat wander ATAU saat seeking)
                     state.isEvading = true; // Masuk mode menghindar
                     state.isSeekingCenter = false; // Batalkan niat ke pusat
-                    
+
                     if (isAtWall) {
                         state.targetFacingAngle = Math.atan2(-state.currentZ, -state.currentX);
                         state.evadeTimer = 1.5;
                     } else {
                         let awayAngle = Math.atan2(state.currentZ - collisionSource.z, state.currentX - collisionSource.x);
-                        let randomOffset = (Math.random() - 0.5) * (Math.PI / 1.5); 
+                        let randomOffset = (Math.random() - 0.5) * (Math.PI / 1.5);
                         state.targetFacingAngle = awayAngle + randomOffset;
                         state.evadeTimer = 1.0;
                     }
@@ -256,19 +283,19 @@ export function animatePawmot(actor, time, deltaTime) {
                 }
                 // Jika masih stuck, JANGAN BERGERAK (biarkan belok)
             }
-        
+
         } // --- Akhir dari 'if (!state.isPausing)' ---
-        
+
         // --- 3. Terapkan Transformasi (SELALU JALAN) ---
         const tiltEffectY = state.currentZ * Math.sin(state.grassTiltRad * -1.0);
-        const dynamicY = state.baseY + tiltEffectY;
+        const dynamicY = state.baseY;
 
         LIBS.set_I4(M); // Reset matriks
 
-        LIBS.translateY(M, dynamicY); 
+        LIBS.translateY(M, dynamicY);
         LIBS.scale(M, state.baseScale, state.baseScale, state.baseScale);
-        LIBS.rotateX(M, state.grassTiltRad); 
-        LIBS.rotateY(M, -state.currentFacingAngle + (Math.PI / 2)); 
+        LIBS.rotateX(M, state.grassTiltRad + 0.5);
+        LIBS.rotateY(M, -state.currentFacingAngle + (Math.PI / 2));
         LIBS.translateX(M, state.currentX);
         LIBS.translateZ(M, state.currentZ);
     }
