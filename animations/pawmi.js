@@ -109,7 +109,7 @@ export function animatePawmi(actor, time, deltaTime) {
         // Ini adalah langkah kunci untuk memperbaiki clipping setelah semua rotasi diterapkan.
         LIBS.translateZ(actor.tailRef.MOVE_MATRIX, TAIL_OFFSET_Z+-0.36);
         LIBS.translateY(actor.tailRef.MOVE_MATRIX, TAIL_OFFSET_Y);
-        LIBS.translateX(actor.tailRef.MOVE_MATRIX, 0.05); // Tidak ada offset pada sumbu X
+        LIBS.translateX(actor.tailRef.MOVE_MATRIX, -0.3); // Tidak ada offset pada sumbu X
 
     }
 
