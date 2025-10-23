@@ -18,8 +18,8 @@ export class IslandNode extends group {
 
         // Transformasi lokal untuk geometri pulau
         this.ISLAND_GEOMETRY_MATRIX = LIBS.get_I4();
-        LIBS.translateY(this.ISLAND_GEOMETRY_MATRIX, 0);
-        LIBS.rotateX(this.ISLAND_GEOMETRY_MATRIX, -0.28);
+        LIBS.translateY(this.ISLAND_GEOMETRY_MATRIX, 0.3);
+        LIBS.rotateX(this.ISLAND_GEOMETRY_MATRIX, 0);
 
         // --- Buat Anak Opaque (yang menggunakan mainProgram) ---
 
@@ -27,21 +27,24 @@ export class IslandNode extends group {
         this.env.treePositions.forEach(treeData => {
             const tree = new TreeGroup(_Mmatrix, _normal, env, treeData);
             this.childs.push(tree);
+            LIBS.translateY(tree.POSITION_MATRIX, 0.35); // Sesuaikan posisi Y agar pas di atas tanah
         });
 
         // 2. Buat Poké Ball
         this.env.rockPositions.forEach(pokeballData => {
             const pokeball = new PokeballGroup(_Mmatrix, _normal, env, pokeballData);
             this.childs.push(pokeball);
+             LIBS.translateY(pokeball.POSITION_MATRIX, 0.15); // Sesuaikan posisi Y agar pas di atas tanah
         });
+       
 
         // 3. Buat Rumput (Gunakan versi 250 helai, padat di tengah)
         const fullIslandGrass = new GrassPatch(_Mmatrix, _normal, env, {
             bladeCount: 400,
             patchRadius: 2.03
         });
-        LIBS.translateY(fullIslandGrass.POSITION_MATRIX, 0.55);
-        LIBS.rotateX(fullIslandGrass.POSITION_MATRIX, LIBS.degToRad(-16));
+        LIBS.translateY(fullIslandGrass.POSITION_MATRIX, 0.45);
+        LIBS.rotateX(fullIslandGrass.POSITION_MATRIX, LIBS.degToRad(0));
         this.childs.push(fullIslandGrass);
 
         // --- Buat Anak Transparan (yang menggunakan waterfallProgram) ---

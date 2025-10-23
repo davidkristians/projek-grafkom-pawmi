@@ -31,17 +31,18 @@ export class GrassPatch extends group {
             const radiusPos = Math.sqrt(Math.random()) * patchRadius; // More even distribution
             LIBS.set_I4(blade.POSITION_MATRIX);
             LIBS.translateX(blade.POSITION_MATRIX, Math.cos(angle) * radiusPos);
+            LIBS.translateY(blade.POSITION_MATRIX, 0.5); // Ground level
             LIBS.translateZ(blade.POSITION_MATRIX, Math.sin(angle) * radiusPos);
             
 
             // Perubahan di sini: Rotasi agar lebih tegak
             // Orientasi awal kerucut biasanya "tidur" di sumbu Y.
             // Putar 90 derajat di sumbu X agar berdiri tegak.
-            LIBS.rotateX(blade.POSITION_MATRIX, LIBS.degToRad(240)); 
+            LIBS.rotateX(blade.POSITION_MATRIX, LIBS.degToRad(-90)); 
             
             // Tambahkan sedikit kemiringan acak (opsional, untuk variasi)
             LIBS.rotateZ(blade.POSITION_MATRIX, LIBS.degToRad(80)); // Sedikit miring kiri/kanan
-            LIBS.rotateY(blade.POSITION_MATRIX, LIBS.degToRad(Math.random() * 360)); // Putar acak di sumbu Y (agar hadapnya acak)
+            LIBS.rotateY(blade.POSITION_MATRIX, LIBS.degToRad(Math.random() * 360)-5); // Putar acak di sumbu Y (agar hadapnya acak)
             
             // Geser sedikit ke atas agar pangkalnya pas di permukaan saat GrassPatch diletakkan
             LIBS.translateY(blade.POSITION_MATRIX, bladeHeight / 2); // Pusatkan pangkal kerucut di 0,0,0 lokalnya

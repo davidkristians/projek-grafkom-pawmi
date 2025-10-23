@@ -97,6 +97,8 @@ export function createPawmi(animationLoop) {
     PawmiRig.leftHandMove = Left_Hand.MOVE_MATRIX;
     PawmiRig.rightHandMove = Right_Hand.MOVE_MATRIX;
     PawmiRig.headMove = Head.MOVE_MATRIX;
+    PawmiRig.LeftFootMove= Left_Foot.MOVE_MATRIX;
+    PawmiRig.RightFootMove= Right_Foot.MOVE_MATRIX;
 
     PawmiRig.setup();
 
