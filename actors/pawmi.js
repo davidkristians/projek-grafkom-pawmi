@@ -104,7 +104,7 @@ export function createPawmi(animationLoop) {
 
     LIBS.set_I4(PawmiRig.POSITION_MATRIX);
     LIBS.translateY(PawmiRig.POSITION_MATRIX, 1.09);
-    LIBS.scale(PawmiRig.POSITION_MATRIX, 0.2, 0.2, 0.2);
+    LIBS.scale(PawmiRig.POSITION_MATRIX, 0.1, 0.1, 0.1);
 
     animationLoop.registerActorAnimation(PawmiRig, animatePawmi);
 
