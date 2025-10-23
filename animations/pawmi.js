@@ -69,9 +69,10 @@ export function animatePawmi(actor, time, deltaTime) {
     // ... (Kode konstanta di atas tidak berubah)
 
     // --- KONSTANTA BARU untuk Rotasi Ekor Penuh (Disarankan) ---
-    const TAIL_SPIN_SPEED = 8.0;
+    const TAIL_SPIN_SPEED = 3.5;
     const TAIL_TILT_ANGLE = LIBS.degToRad(20);
     const MAX_ANGLE = 2 * Math.PI;
+    const PAWMI_TAIL_AMOUNT = 0.9; //
 
     // --- KONSTANTA TRANSLASI BARU UNTUK MENGHINDARI CLIPPING ---
     const TAIL_OFFSET_Z = 0.2; // Pindahkan ekor 0.1 unit ke belakang (menjauhi badan)
@@ -84,12 +85,12 @@ export function animatePawmi(actor, time, deltaTime) {
     // Animasi Ekor
     if (actor.tailRef) {
         const tailRotationZ = Math.sin(time * PAWMI_TAIL_SPEED) * PAWMI_TAIL_AMOUNT;
-        const tailRotationY = (time * TAIL_SPIN_SPEED) % MAX_ANGLE;
+        const tailRotationX = (time * TAIL_SPIN_SPEED) % MAX_ANGLE;
 
         LIBS.set_I4(actor.tailRef.MOVE_MATRIX);
 
         // 1. Miringkan ekor (Kemiringan Statis)
-        LIBS.rotateX(actor.tailRef.MOVE_MATRIX, tailRotationY);
+        LIBS.rotateX(actor.tailRef.MOVE_MATRIX, tailRotationX);
 
         // 2. Rotasi Berkelanjutan (Putaran Penuh) pada Sumbu Y
         LIBS.rotateY(actor.tailRef.MOVE_MATRIX, TAIL_TILT_ANGLE);
@@ -99,7 +100,7 @@ export function animatePawmi(actor, time, deltaTime) {
 
         // 4. TRANSLASI UNTUK MENGHINDARI TEMBUS BADAN (CLIPPING)
         // Ini adalah langkah kunci untuk memperbaiki clipping setelah semua rotasi diterapkan.
-        LIBS.translateZ(actor.tailRef.MOVE_MATRIX, TAIL_OFFSET_Z+-0.45);
+        LIBS.translateZ(actor.tailRef.MOVE_MATRIX, TAIL_OFFSET_Z+-0.36);
         LIBS.translateY(actor.tailRef.MOVE_MATRIX, TAIL_OFFSET_Y);
         LIBS.translateX(actor.tailRef.MOVE_MATRIX, 0.15); // Tidak ada offset pada sumbu X
 
