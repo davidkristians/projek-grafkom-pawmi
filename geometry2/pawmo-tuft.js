@@ -1,12 +1,10 @@
-// geometry2/pawmo-tuft.js
-import { getBezierPoint, getBezierTangent } from "./bezier.js"; // Pastikan tangent di-impor
+import { getBezierPoint, getBezierTangent } from "./bezier.js";
 
 export class pawmoTuft {
-    // ▼▼▼ DIUBAH: Tambahkan _normal ▼▼▼
     constructor(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, opts = {}) {
         this.GL = GL; this.SHADER_PROGRAM = SHADER_PROGRAM;
         this._position = _position; this._color = _color; this._MMatrix = _Mmatrix;
-        this._normal = _normal; // BARU
+        this._normal = _normal;
         this.POSITION_MATRIX = LIBS.get_I4();
         this.MOVE_MATRIX = LIBS.get_I4();
         this.childs = [];
@@ -18,7 +16,7 @@ export class pawmoTuft {
         const segments = opts.segments ?? 24;
         const rings = opts.rings ?? 24;
 
-        // Titik Bézier Anda (tetap sama)
+        // Titik bezier dari p0 sampe p3
         const p0 = [0.3, -0.375];
         const p1 = [0.75, 0.15];
         const p2 = [0.075, 0.675];
@@ -31,15 +29,12 @@ export class pawmoTuft {
             const profilePoint = getBezierPoint(t, p0, p1, p2, p3);
             const radius = profilePoint.x;
             const y = profilePoint.y;
-
-            // ▼▼▼ BARU: Hitung normal dari tangent ▼▼▼
             const tangent = getBezierTangent(t, p0, p1, p2, p3);
             let n_x = tangent.y;
             let n_y = -tangent.x; // Normal tegak lurus tangent
-            const len = Math.sqrt(n_x*n_x + n_y*n_y) || 1; // Hindari pembagian nol
+            const len = Math.sqrt(n_x*n_x + n_y*n_y) || 1;
             const n_x_norm = n_x / len;
             const n_y_norm = n_y / len;
-            // ▲▲▲ SELESAI ▲▲▲
 
             for (let j = 0; j <= segments; j++) {
                 const angle = (j / segments) * 2 * Math.PI;
@@ -48,17 +43,16 @@ export class pawmoTuft {
                 const x = radius * cosA;
                 const z = radius * sinA;
 
-                // ▼▼▼ BARU: Normal 3D ▼▼▼
+                // Hitung normal 3d nya
                 const nx = n_x_norm * cosA;
                 const ny = n_y_norm;
                 const nz = n_x_norm * sinA;
 
-                // ▼▼▼ DIUBAH: Tambahkan normal ke vertex (stride 9) ▼▼▼
                 vertices.push(x, y, z, ...color, nx, ny, nz);
             }
         }
 
-        // Pembuatan faces (tetap sama)
+        // Pembuatan faces (permukaan)
         const rowLen = segments + 1;
         for (let i = 0; i < rings; i++) {
             for (let j = 0; j < segments; j++) {
@@ -76,8 +70,7 @@ export class pawmoTuft {
         this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array(this.vertex), this.GL.STATIC_DRAW);
         this.OBJECT_FACES=this.GL.createBuffer(); this.GL.bindBuffer(this.GL.ELEMENT_ARRAY_BUFFER, this.OBJECT_FACES);
         this.GL.bufferData(this.GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.faces), this.GL.STATIC_DRAW);
-        // this.childs.forEach(c => c.setup()); // Tuft tidak punya anak
     }
-    // Render() akan di-patch oleh pawmo.js
-    render(PARENT_MATRIX) { /* ... This will be patched ... */ }
+
+    render(PARENT_MATRIX) {  }
 }

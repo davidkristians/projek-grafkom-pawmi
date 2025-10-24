@@ -1,12 +1,10 @@
-// geometry2/pawmo-torso.js (Versi Upgrade dengan Normal)
-import { getBezierPoint, getBezierTangent } from "./bezier.js"; // Pastikan tangent di-impor
+import { getBezierPoint, getBezierTangent } from "./bezier.js";
 
 export class pawmoTorso {
-    // ▼▼▼ DIUBAH: Tambahkan _normal ▼▼▼
     constructor(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, opts = {}) {
         this.GL = GL; this.SHADER_PROGRAM = SHADER_PROGRAM;
         this._position = _position; this._color = _color; this._MMatrix = _Mmatrix;
-        this._normal = _normal; // BARU
+        this._normal = _normal;
         this.POSITION_MATRIX = LIBS.get_I4();
         this.MOVE_MATRIX = LIBS.get_I4();
         this.childs = [];
@@ -18,7 +16,7 @@ export class pawmoTorso {
         const segments = opts.segments ?? 48;
         const rings = opts.rings ?? 48;
 
-        // Titik Bézier Anda (tetap sama)
+        // Titik bezier dari p0 sampai p3
         const p0 = [0.0, -1.6];
         const p1 = [2.2, -1.6];
         const p2 = [1.6, 1.8];
@@ -32,14 +30,12 @@ export class pawmoTorso {
             const radius = profilePoint.x;
             const y = profilePoint.y;
 
-            // ▼▼▼ BARU: Hitung normal dari tangent ▼▼▼
             const tangent = getBezierTangent(t, p0, p1, p2, p3);
             let n_x = tangent.y;
             let n_y = -tangent.x; // Normal tegak lurus tangent
             const len = Math.sqrt(n_x*n_x + n_y*n_y) || 1; // Hindari pembagian nol
             const n_x_norm = n_x / len;
             const n_y_norm = n_y / len;
-            // ▲▲▲ SELESAI ▲▲▲
 
             for (let j = 0; j <= segments; j++) {
                 const angle = (j / segments) * 2 * Math.PI;
@@ -48,17 +44,16 @@ export class pawmoTorso {
                 const x = radius * cosA;
                 const z = radius * sinA;
 
-                // ▼▼▼ BARU: Normal 3D ▼▼▼
+                // hitung normal 3d nya
                 const nx = n_x_norm * cosA;
                 const ny = n_y_norm;
                 const nz = n_x_norm * sinA;
 
-                // ▼▼▼ DIUBAH: Tambahkan normal ke vertex (stride 9) ▼▼▼
                 vertices.push(x, y, z, ...color, nx, ny, nz);
             }
         }
 
-        // Pembuatan faces (tetap sama)
+        // Pembuatan faces
         const rowLen = segments + 1;
         for (let i = 0; i < rings; i++) {
             for (let j = 0; j < segments; j++) {
@@ -66,7 +61,6 @@ export class pawmoTorso {
                 faces.push(i0, i1, i2, i1, i3, i2);
             }
         }
-
         this.vertex = vertices;
         this.faces = faces;
     }
@@ -76,8 +70,7 @@ export class pawmoTorso {
         this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array(this.vertex), this.GL.STATIC_DRAW);
         this.OBJECT_FACES=this.GL.createBuffer(); this.GL.bindBuffer(this.GL.ELEMENT_ARRAY_BUFFER, this.OBJECT_FACES);
         this.GL.bufferData(this.GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.faces), this.GL.STATIC_DRAW);
-        // this.childs.forEach(c => c.setup()); // Torso ini tidak punya anak
     }
-    // Render() akan di-patch oleh pawmo.js
-    render(PARENT_MATRIX) { /* ... This will be patched ... */ }
+
+    render(PARENT_MATRIX) {  }
 }

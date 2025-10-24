@@ -4,7 +4,6 @@ import { pawmoEar } from "./pawmo-ear.js";
 import { pawmoTuft } from "./pawmo-tuft.js";
 
 export class pawmoHead extends group {
-    // ▼▼▼ DIUBAH: Tambahkan _normal ▼▼▼
     constructor(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, opts = {}) {
         super(_Mmatrix, _normal); // Teruskan _normal ke parent
 
@@ -15,7 +14,6 @@ export class pawmoHead extends group {
         const PAWMO_WHITE = [1.0, 1.0, 1.0];
         const PAWMO_GREEN = [70/255, 128/255, 107/255];
 
-        // ▼▼▼ DIUBAH: Teruskan _normal ke SEMUA anak ▼▼▼
         const baseHead = new ellipsoid(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, { rx: 1.2, ry: 1.1, rz: 1.1, color: PAWMO_ORANGE });
         const muzzle = new ellipsoid(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, { rx: 0.6, ry: 0.45, rz: 0.6, color: PAWMO_CREAM });
         const nose = new ellipsoid(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, { rx: 0.05, ry: 0.05, rz: 0.05, color: PAWMO_BLACK });
@@ -40,7 +38,7 @@ export class pawmoHead extends group {
         const headTuft = new pawmoTuft(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, { color: PAWMO_ORANGE });
         const headTuft2 = new pawmoTuft(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, { color: PAWMO_ORANGE });
         
-        // --- Positioning (SAMA PERSIS) ---
+        // --- Positioning ---
         LIBS.set_I4(muzzle.POSITION_MATRIX); LIBS.translateZ(muzzle.POSITION_MATRIX, 0.6); LIBS.translateY(muzzle.POSITION_MATRIX, -0.2);
         LIBS.set_I4(nose.POSITION_MATRIX); LIBS.translateZ(nose.POSITION_MATRIX, 1.2); LIBS.translateY(nose.POSITION_MATRIX, -0.1);
         LIBS.set_I4(leftEye.POSITION_MATRIX); LIBS.translateX(leftEye.POSITION_MATRIX, -0.4); LIBS.translateY(leftEye.POSITION_MATRIX, 0.2); LIBS.translateZ(leftEye.POSITION_MATRIX, 0.9);
@@ -68,7 +66,7 @@ export class pawmoHead extends group {
         LIBS.set_I4(headTuft.POSITION_MATRIX); LIBS.translateX(headTuft.POSITION_MATRIX, 0); LIBS.translateY(headTuft.POSITION_MATRIX, 1); LIBS.translateZ(headTuft.POSITION_MATRIX, 0.4); LIBS.rotateX(headTuft.POSITION_MATRIX, LIBS.degToRad(30)); LIBS.rotateY(headTuft.POSITION_MATRIX, LIBS.degToRad(10)); LIBS.rotateZ(headTuft.POSITION_MATRIX, LIBS.degToRad(-30));
         LIBS.set_I4(headTuft2.POSITION_MATRIX); LIBS.scale(headTuft2.POSITION_MATRIX, 0.5, 0.5, 0.5); LIBS.translateX(headTuft2.POSITION_MATRIX, 0.1); LIBS.translateY(headTuft2.POSITION_MATRIX, 1.3); LIBS.translateZ(headTuft2.POSITION_MATRIX, 0.5); LIBS.rotateX(headTuft2.POSITION_MATRIX, LIBS.degToRad(30)); LIBS.rotateY(headTuft2.POSITION_MATRIX, LIBS.degToRad(10)); LIBS.rotateZ(headTuft2.POSITION_MATRIX, LIBS.degToRad(-20));
 
-        // Add all parts
+        // Push isi di kepala
         this.childs.push(
             baseHead, muzzle, nose, leftEye, rightEye, mouthLeft, mouthRight, 
             leftCheek, rightCheek, leftEyepupil, rightEyepupil,
@@ -77,7 +75,6 @@ export class pawmoHead extends group {
             headTuft, headTuft2
         );
         
-        // ▼▼▼ BARU: Simpan referensi ke mulut untuk animasi ▼▼▼
         this.smileRef = new group(_Mmatrix, _normal);
         this.smileRef.childs.push(mouthLeft, mouthRight);
     }

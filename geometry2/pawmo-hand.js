@@ -1,16 +1,15 @@
-// geometry/pawmo-hand.js
 import { getBezierPoint, getBezierTangent } from "./bezier.js";
 import { group } from "./group.js";
 import { cone } from "./cone.js";
 
-// Kelas internal untuk lengan
 export class PawmoArm {
     constructor(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, opts = {}) {
         this.GL=GL; this.SHADER_PROGRAM=SHADER_PROGRAM; this._position=_position; this._color=_color; this._MMatrix=_Mmatrix;
-        this._normal = _normal; // BARU
+        this._normal = _normal;
         this.POSITION_MATRIX=LIBS.get_I4(); this.MOVE_MATRIX=LIBS.get_I4();
         this._build(opts);
     }
+
     _build(opts) {
         const orangeColor = opts.orange, whiteColor = opts.white;
         const segments = opts.segments ?? 32, rings = opts.rings ?? 32;
@@ -19,7 +18,6 @@ export class PawmoArm {
         const vertices=[], faces=[];
         for (let i=0; i<=rings; i++) {
             const t=i/rings, profilePoint=getBezierPoint(t,p0,p1,p2,p3), radius=profilePoint.x, y=profilePoint.y;
-            
             // Hitung normal dari tangent
             const tangent = getBezierTangent(t, p0, p1, p2, p3);
             const n_x = tangent.y, n_y = -tangent.x;
@@ -33,7 +31,6 @@ export class PawmoArm {
             for (let j=0; j<=segments; j++) {
                 const angle=(j/segments)*2*Math.PI, cosA = Math.cos(angle), sinA = Math.sin(angle);
                 const x=radius*cosA, z=radius*sinA;
-                // Normal 3D
                 const nx = n_x_norm * cosA;
                 const ny = n_y_norm;
                 const nz = n_x_norm * sinA;
@@ -55,14 +52,14 @@ export class PawmoArm {
         this.OBJECT_FACES=this.GL.createBuffer(); this.GL.bindBuffer(this.GL.ELEMENT_ARRAY_BUFFER, this.OBJECT_FACES);
         this.GL.bufferData(this.GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.faces), this.GL.STATIC_DRAW);
     }
-    // Render akan di-patch
-    render(PARENT_MATRIX) { /* ... This will be patched ... */ }
+
+    render(PARENT_MATRIX) {  }
 }
 
 // KELAS UTAMA PAWMOHAND (GROUP)
 export class pawmoHand extends group {
     constructor(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, opts = {}) {
-        super(_Mmatrix, _normal); // Teruskan _normal
+        super(_Mmatrix, _normal); // Teruskan _normal nya
 
         const arm = new PawmoArm(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, opts);
         

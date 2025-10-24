@@ -1,4 +1,3 @@
-// animations/pawmo.js - Versi Final (Full Loop dengan Duduk & Konstanta Jelas)
 const LIBS = window.LIBS;
 
 // ========== KONSTANTA ANIMASI ==========
@@ -35,8 +34,8 @@ const PAWMO_BREATH_AMOUNT_Z = 0.1;
 const SITTING_Y_OFFSET = -0.25;
 const SIT_LEAN_ANGLE = LIBS.degToRad(15);
 const LEG_SIT_ROT_X = LIBS.degToRad(-90);
-const LEG_FORWARD_DISTANCE = 0.7; // <-- Mengontrol maju/mundur kaki
-const LEG_LIFT_AMOUNT = 1;      // <-- Mengontrol atas/bawah kaki
+const LEG_FORWARD_DISTANCE = 0.7; // <-- Untuk kontrol maju/mundur kaki
+const LEG_LIFT_AMOUNT = 1;      // <-- Untuk atas/bawah kaki
 
 // ========== KALKULASI WAKTU SIKLUS (9 FASE) ==========
 const F1_WALK_END = PAWMO_WALK_CYCLE_DURATION / 2; // 3.0s
@@ -193,7 +192,6 @@ export function animatePawmo(actor, time, deltaTime) {
 
 
     // ========== ANIMASI KAKI & TANGAN (TERGANTUNG STATE) ==========
-
     if (isWalking) {
         // === STATE: JALAN ===
         const sinWalk = Math.sin(time * PAWMO_WALK_SPEED);

@@ -1,8 +1,6 @@
-// geometry2/pawmo-foot.js
 import { group } from "./group.js";
 import { paraboloid } from "./paraboloid.js";
 
-// Helper function (sudah diupgrade untuk menghasilkan normal)
 function generateHemiEllipsoid(rx, ry, rz, segments, rings) {
     const vertices = [], faces = [];
     // Bagian atas melengkung
@@ -38,15 +36,15 @@ function generateHemiEllipsoid(rx, ry, rz, segments, rings) {
     return { vertices, faces };
 }
 
-// Kelas internal untuk telapak kaki (BaseFoot)
+// Kelas internal untuk telapak kakinya
 class BaseFoot {
-    // ▼▼▼ DIUBAH: Tambahkan _normal ▼▼▼
     constructor(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, opts = {}) {
         this.GL=GL; this.SHADER_PROGRAM=SHADER_PROGRAM; this._position=_position; this._color=_color; this._MMatrix=_Mmatrix;
-        this._normal = _normal; // BARU
+        this._normal = _normal;
         this.POSITION_MATRIX=LIBS.get_I4(); this.MOVE_MATRIX=LIBS.get_I4();
         this._build(opts);
     }
+
     _build(opts) {
         const geo = generateHemiEllipsoid(opts.rx ?? 0.5, opts.ry ?? 0.4, opts.rz ?? 0.7, 24, 16);
         const color = opts.color ?? [1,1,1];
@@ -59,18 +57,19 @@ class BaseFoot {
         this.vertex = finalVertices;
         this.faces = geo.faces;
     }
+
     setup() {
         this.OBJECT_VERTEX=this.GL.createBuffer(); this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.OBJECT_VERTEX);
         this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array(this.vertex), this.GL.STATIC_DRAW);
         this.OBJECT_FACES=this.GL.createBuffer(); this.GL.bindBuffer(this.GL.ELEMENT_ARRAY_BUFFER, this.OBJECT_FACES);
         this.GL.bufferData(this.GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.faces), this.GL.STATIC_DRAW);
     }
-    // ▼▼▼ DIUBAH: Fungsi render ini tidak di-patch, jadi kita perbaiki manual ▼▼▼
+    
     render(PARENT_MATRIX, NMatrixLoc) {
         const M=LIBS.get_I4(); LIBS.mul(M, PARENT_MATRIX, this.POSITION_MATRIX); LIBS.mul(M, M, this.MOVE_MATRIX);
         this.GL.useProgram(this.SHADER_PROGRAM);
         this.GL.uniformMatrix4fv(this._MMatrix, false, M);
-        this.GL.uniformMatrix4fv(NMatrixLoc, false, M); // Kirim matriks normal
+        this.GL.uniformMatrix4fv(NMatrixLoc, false, M);
         this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.OBJECT_VERTEX);
         this.GL.vertexAttribPointer(this._position, 3, this.GL.FLOAT, false, 36, 0);
         this.GL.enableVertexAttribArray(this._position);

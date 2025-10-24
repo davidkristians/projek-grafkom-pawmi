@@ -18,9 +18,7 @@ export class WaterfallStream {
         const bottomRadius = 0.8; // Radius di bagian bawah (saat menyebar)
         const segmentsH = 20; // Jumlah segmen vertikal untuk kelancaran lengkungan
         const segmentsR = 12; // Jumlah segmen radial
-        // ▼▼▼ WARNA DIUBAH DI SINI ▼▼▼
         const color = [0.3, 0.6, 1.0]; // Biru lebih terang
-        // ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲
 
         let vertices = [];
         let colors = [];

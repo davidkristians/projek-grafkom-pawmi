@@ -1,5 +1,3 @@
-// animations/pawmi.js
-
 const LIBS = window.LIBS;
 
 // Konstanta khusus animasi Pawmi
@@ -7,7 +5,7 @@ const PAWMI_HAND_ROT_AMPLITUDE = LIBS.degToRad(15);
 const PAWMI_HAND_SPEED = 2.5;
 const PAWMI_HEAD_NOD_AMPLITUDE = LIBS.degToRad(15);
 
-// --- KONSTANTA BARU UNTUK JUMP ---
+// --- KONSTANTA UNTUK JUMP ---
 const PAWMI_JUMP_DURATION = 1.0; 
 const PAWMI_JUMP_HEIGHT = 0.5;
 
@@ -18,7 +16,7 @@ const PAWMI_TAIL_AMOUNT = 0.25;
 const PAWMI_MOUTH_SPEED = 2.0;
 const PAWMI_MOUTH_MAX_SCALE = 1.4;
 
-// Konstanta untuk gerakan maju-mundur
+// Konstanta untuk maju-mundur
 const PAWMI_WALK_CYCLE_DURATION = 4.0; // durasi satu siklus penuh (maju + mundur) dalam detik
 const PAWMI_WALK_DISTANCE = 1.5; // jarak maksimal bergerak
 const PAWMI_TURN_DURATION = 0.8; // durasi rotasi 180 derajat dalam detik
@@ -73,9 +71,7 @@ export function animatePawmi(actor, time, deltaTime) {
     LIBS.translateY(actor.POSITION_MATRIX, 0.3); // posisi X tetap
     LIBS.scale(actor.POSITION_MATRIX, 0.2, 0.2, 0.2); // scale tetap
 
-    // ... (Kode konstanta di atas tidak berubah)
-
-    // --- KONSTANTA BARU untuk Rotasi Ekor Penuh (Disarankan) ---
+    // --- KONSTANTA BARU untuk Rotasi Ekor Penuh ---
     const TAIL_SPIN_SPEED = 3.5;
     const TAIL_TILT_ANGLE = LIBS.degToRad(20);
     const MAX_ANGLE = 2 * Math.PI;
@@ -84,10 +80,6 @@ export function animatePawmi(actor, time, deltaTime) {
     // --- KONSTANTA TRANSLASI BARU UNTUK MENGHINDARI CLIPPING ---
     const TAIL_OFFSET_Z = 0.2; // Pindahkan ekor 0.1 unit ke belakang (menjauhi badan)
     const TAIL_OFFSET_Y = 0.2; // Pindahkan ekor 0.15 unit ke bawah
-
-    // Fungsi animasi yang diekspor
-
-    // ... (Kode animasi gerakan maju-mundur dan badan di atas tidak berubah)
 
     // Animasi Ekor
     if (actor.tailRef) {
@@ -106,15 +98,12 @@ export function animatePawmi(actor, time, deltaTime) {
         LIBS.rotateZ(actor.tailRef.MOVE_MATRIX, tailRotationZ);
 
         // 4. TRANSLASI UNTUK MENGHINDARI TEMBUS BADAN (CLIPPING)
-        // Ini adalah langkah kunci untuk memperbaiki clipping setelah semua rotasi diterapkan.
+        // Untuk memperbaiki clipping setelah semua rotasi diterapkan.
         LIBS.translateZ(actor.tailRef.MOVE_MATRIX, TAIL_OFFSET_Z+-0.36);
         LIBS.translateY(actor.tailRef.MOVE_MATRIX, TAIL_OFFSET_Y);
         LIBS.translateX(actor.tailRef.MOVE_MATRIX, -0.3); // Tidak ada offset pada sumbu X
 
     }
-
-    // ... (Kode animasi mulut, tangan, kaki, dan kepala di bawah tidak berubah)
-
 
     // Animasi Mulut
     if (actor.mouthRef) {

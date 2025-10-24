@@ -1,11 +1,8 @@
-// geometry/bezier.js
-
-// Linear interpolation (mix)
 function mix(a, b, t) {
     return a * (1 - t) + b * t;
 }
 
-// Calculates a 2D point on a cubic Bézier curve
+// hitung titik di kurva bezier
 export function getBezierPoint(t, p0, p1, p2, p3) {
     const ab_x = mix(p0[0], p1[0], t);
     const ab_y = mix(p0[1], p1[1], t);
@@ -28,10 +25,9 @@ export function getBezierPoint(t, p0, p1, p2, p3) {
     return { x: final_x, y: final_y };
 }
 
-// ▼▼▼ BARU: Fungsi ini penting untuk menghitung normal di permukaan melengkung ▼▼▼
-// Menghitung turunan/garis singgung (tangent) dari kurva Bézier
+// Menghitung turunan/garis singgung (tangent) dari kurva bezier
 export function getBezierTangent(t, p0, p1, p2, p3) {
-    // Rumus turunan kurva Bézier kubik:
+    // Rumus turunan kurva bezier kubik:
     // B'(t) = 3(1-t)^2 (P1-P0) + 6(1-t)t (P2-P1) + 3t^2 (P3-P2)
     const t2 = t * t;
     const one_minus_t = 1 - t;

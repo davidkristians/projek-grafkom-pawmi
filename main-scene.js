@@ -1,5 +1,3 @@
-// main-scene.js (BERSIH - Hanya mengontrol Kamera)
-
 // Import sistem utama
 import { Environment } from './env/environment.js';
 import { Camera } from './env/camera.js';

@@ -1,4 +1,3 @@
-// actors/WaterfallSource.js
 export class WaterfallSource {
     constructor(gl, shaderProgram, posLoc, colLoc, normLoc, mvLoc, timeLoc) {
         this.GL = gl;
@@ -11,13 +10,11 @@ export class WaterfallSource {
 
         this.POSITION_MATRIX = LIBS.get_I4();
         this.MOVE_MATRIX = LIBS.get_I4();
-        this.childs = []; // Tidak punya anak
+        this.childs = [];
 
         const radius = 0.6;
         const segments = 16;
-        // ▼▼▼ WARNA DIUBAH DI SINI ▼▼▼
-        const color = [0.2, 0.5, 0.9]; // Biru agak pekat
-        // ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲
+        const color = [0.2, 0.5, 0.9];
 
         let vertices = [0, 0, 0];
         let colors = [...color];
@@ -89,7 +86,7 @@ export class WaterfallSource {
         this.GL.bindBuffer(this.GL.ELEMENT_ARRAY_BUFFER, this.OBJECT_FACES);
         this.GL.drawElements(this.GL.TRIANGLES, this.faces.length, this.GL.UNSIGNED_SHORT, 0);
 
-        // Disable setelah render (penting jika IslandNode tidak handle)
+        // Disable setelah render, IslandNode tidak handle
         this.GL.disableVertexAttribArray(this._position);
         this.GL.disableVertexAttribArray(this._color);
         this.GL.disableVertexAttribArray(this._normal);
