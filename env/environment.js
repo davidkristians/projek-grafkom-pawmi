@@ -1,5 +1,3 @@
-// env/environment.js (LENGKAP - Versi Scene Graph, Awan Statis, Shader Bersih)
-
 // Ambil LIBS dari window (sudah di-load oleh index.html)
 const LIBS = window.LIBS;
 
@@ -89,7 +87,6 @@ export class Environment {
                 vAO = clamp(vAO, 0.7, 1.0);
                 vColor = aColor;
             }`;
-        // --- Akhir Vertex Shader ---
 
         // --- Shader Utama: Fragment Shader ---
         const fsSource = `
@@ -125,7 +122,6 @@ export class Environment {
 
                 gl_FragColor = vec4(lighting, 1.0);
             }`;
-        // --- Akhir Fragment Shader ---
 
         const vertexShader = this._createShader(gl.VERTEX_SHADER, vsSource);
         const fragmentShader = this._createShader(gl.FRAGMENT_SHADER, fsSource);
@@ -174,7 +170,6 @@ export class Environment {
                 vNormal = normalize(aNormal);
                 vColor = aColor;
             }`;
-        // --- Akhir Vertex Shader Awan ---
 
         // --- Shader Awan: Fragment Shader ---
         const cloudFsSource = `
@@ -203,7 +198,6 @@ export class Environment {
                 float alpha = mix(0.94, 0.98, edge);
                 gl_FragColor = vec4(finalColor, alpha);
             }`;
-        // --- Akhir Fragment Shader Awan ---
 
         const cloudVs = this._createShader(gl.VERTEX_SHADER, cloudVsSource);
         const cloudFs = this._createShader(gl.FRAGMENT_SHADER, cloudFsSource);
@@ -230,8 +224,7 @@ export class Environment {
         this.globalApp.cloudProgram = cloudProgram;
     }
 
-    // Ganti fungsi lama di environment.js dengan yang ini:
-    // HAPUS FUNGSI LAMA, LALU PASTE YANG INI DI env/environment.js
+    // Ganti fungsi lama di environment.js dengan ini
     _setupWaterfallShader() {
         const gl = this.gl;
 
@@ -266,7 +259,6 @@ export class Environment {
             vNormal = normalize(aNormal);
             vColor = aColor;
         }`;
-        // --- Akhir Vertex Shader ---
 
         // --- Shader Air Terjun: Fragment Shader ---
         const fsSource = `precision highp float;
@@ -282,7 +274,6 @@ export class Environment {
             vec3 finalColor = vColor + foamColor;
             gl_FragColor = vec4(finalColor, 0.85);
         }`;
-        // --- Akhir Fragment Shader ---
 
         const vertexShader = this._createShader(gl.VERTEX_SHADER, vsSource);
         const fragmentShader = this._createShader(gl.FRAGMENT_SHADER, fsSource);
@@ -387,9 +378,6 @@ export class Environment {
         this.globalApp.islandPositions = [[-6, 0, 0], [0, 0, 0], [6, 0, 0]];
     }
 
-    // --- Fungsi Render Utama (Versi Scene Graph + Awan Statis) ---
-// env/environment.js
-
     // --- Fungsi Render Utama (Versi Pulau = Awan) ---
     render(viewMatrix, projectionMatrix) {
         const gl = this.gl;
@@ -400,11 +388,8 @@ export class Environment {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.clearColor(0.53, 0.81, 0.92, 1.0); gl.clearDepth(1.0);
 
-        // ▼▼▼ BARU: Ambil matriks 'NoRotation' sekali di atas ▼▼▼
         // Kita butuh ini untuk Awan dan Pulau
         const viewMatrixNoRot = camera.getViewMatrixNoRotation();
-        
-        // ▲▲▲ SELESAI ▲▲▲
 
         // 2. Render Awan (jika program cloud ada dan kamera ada)
         if (this.cloudProgram && this.cProjectionLocation && this.buffers.cloud && camera) {
@@ -415,12 +400,10 @@ export class Environment {
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
             gl.depthMask(false);
 
-            // (viewMatrixNoRot sudah diambil di atas)
-
             if (this.globalApp.cloudSystem && this.globalApp.cloudSystem.clouds) {
                 for (const cloudData of this.globalApp.cloudSystem.clouds) {
                     let cloudMv = LIBS.get_I4();
-                    // Kalikan dengan view matrix TANPA rotasi
+                    // Kalikan dengan view matrix tanpa rotasi
                     LIBS.mul(cloudMv, viewMatrixNoRot, cloudMv);
                     // Terapkan transformasi lokal awan
                     LIBS.translateX(cloudMv, cloudData.x);
@@ -441,9 +424,7 @@ export class Environment {
             gl.useProgram(this.mainProgram);
             gl.uniformMatrix4fv(this.globalApp.projLoc, false, projectionMatrix);
 
-            // ▼▼▼ BARU: Bagian 3.1 - Render Pulau (seperti awan) ▼▼▼
-            // Kita render pulau-pulau di sini secara manual, menggunakan
-            // data posisi dari 'this.globalApp.islandPositions'
+            // Render pulau di sini secara manual, menggunakan data posisi dari 'this.globalApp.islandPositions'
             // dan matriks 'viewMatrixNoRot'.
             if (this.globalApp.islandPositions && this.buffers.island) {
                 // for (const pos of this.globalApp.islandPositions) {
@@ -461,10 +442,8 @@ export class Environment {
                 //     this._drawObject(this.buffers.island, islandMv);
                 // }
             }
-            // ▲▲▲ SELESAI ▲▲▲
 
-            // ▼▼▼ DIUBAH: Bagian 3.2 - Render Sisa Scene Graph (Pohon, Batu, Pawmi, dll) ▼▼▼
-            // Render scene graph menggunakan viewMatrix BIASA (DENGAN rotasi)
+            // Render scene graph menggunakan viewMatrix biasa (DENGAN rotasi)
             // PENTING: Pastikan 'IslandNode' tidak ada lagi di dalam 'this.globalApp.actors'
             for (const actor of this.globalApp.actors) {
                 actor.render(viewMatrix);
@@ -506,7 +485,6 @@ export class Environment {
             console.warn("Index buffer missing for cloud drawing");
         }
 
-        // Disable only the attributes that were enabled
         if (attributesEnabled & 1) gl.disableVertexAttribArray(this.cPositionLocation);
         if (attributesEnabled & 2) gl.disableVertexAttribArray(this.cColorLocation);
         if (attributesEnabled & 4) gl.disableVertexAttribArray(this.cNormalLocation);
@@ -554,7 +532,7 @@ export class Environment {
         if (attributesEnabled & 4) gl.disableVertexAttribArray(app.normLoc);
     }
 
-    // --- Fungsi Geometri (SEMUA TETAP SAMA) ---
+    // --- Fungsi Geometri ---
     _createDetailedSphere(radius, segments, baseColor, addDetail = false) { const vertices = []; const colors = []; const normals = []; const indices = []; const segs = Math.floor(segments * 1.5); for (let lat = 0; lat <= segs; lat++) { const theta = lat * Math.PI / segs; const sinTheta = Math.sin(theta); const cosTheta = Math.cos(theta); for (let lon = 0; lon <= segs; lon++) { const phi = lon * 2 * Math.PI / segs; const sinPhi = Math.sin(phi); const cosPhi = Math.cos(phi); const x = cosPhi * sinTheta; const y = cosTheta; const z = sinPhi * sinTheta; const noise = addDetail ? (Math.sin(phi * 4) * Math.sin(theta * 4) * 0.03) : 0; const r = radius + noise; vertices.push(r * x, r * y, r * z); normals.push(x, y, z); let colorVar = 1.0; if (addDetail) { colorVar = 0.96 + Math.random() * 0.08; colorVar *= (0.92 + y * 0.08); } colors.push(baseColor[0] * colorVar, baseColor[1] * colorVar, baseColor[2] * colorVar); } } for (let lat = 0; lat < segs; lat++) { for (let lon = 0; lon < segs; lon++) { const first = lat * (segs + 1) + lon; const second = first + segs + 1; indices.push(first, second, first + 1); indices.push(second, second + 1, first + 1); } } return { vertices: new Float32Array(vertices), colors: new Float32Array(colors), normals: new Float32Array(normals), indices: new Uint16Array(indices) }; }
     _createCurvedTrunk(height, baseRadius, topRadius, segments, curveAmount) { const vertices = []; const colors = []; const normals = []; const indices = []; const heightSegments = 20; const radialSegments = segments; for (let h = 0; h <= heightSegments; h++) { const v = h / heightSegments; const y = v * height; const curveX = Math.sin(v * Math.PI * 1.2) * curveAmount; const curveZ = Math.cos(v * Math.PI * 2.5) * curveAmount * 0.4; const radius = baseRadius + (topRadius - baseRadius) * v; for (let r = 0; r <= radialSegments; r++) { const u = r / radialSegments; const theta = u * Math.PI * 2; const barkNoise = Math.sin(theta * 8 + v * 12) * 0.015; const finalRadius = radius + barkNoise; const x = Math.cos(theta) * finalRadius + curveX; const z = Math.sin(theta) * finalRadius + curveZ; vertices.push(x, y, z); const nx = Math.cos(theta); const nz = Math.sin(theta); normals.push(nx, 0, nz); const colorVar = 0.8 + Math.sin(theta * 5 + v * 10) * 0.2; const darken = 0.88 + v * 0.12; colors.push(0.36 * colorVar * darken, 0.23 * colorVar * darken, 0.13 * colorVar * darken); } } for (let h = 0; h < heightSegments; h++) { for (let r = 0; r < radialSegments; r++) { const current = h * (radialSegments + 1) + r; const next = current + radialSegments + 1; indices.push(current, next, current + 1); indices.push(current + 1, next, next + 1); } } return { vertices: new Float32Array(vertices), colors: new Float32Array(colors), normals: new Float32Array(normals), indices: new Uint16Array(indices) }; }
     _createBranch(length, radius, segments) { const vertices = []; const colors = []; const normals = []; const indices = []; const heightSegments = 10; const radialSegments = segments; for (let h = 0; h <= heightSegments; h++) { const v = h / heightSegments; const y = v * length; const currentRadius = radius * (1 - v * 0.6); const bendX = v * v * 0.1; for (let r = 0; r <= radialSegments; r++) { const u = r / radialSegments; const theta = u * Math.PI * 2; const x = Math.cos(theta) * currentRadius + bendX; const z = Math.sin(theta) * currentRadius; vertices.push(x, y, z); normals.push(Math.cos(theta), 0, Math.sin(theta)); const colorVar = 0.85 + Math.sin(theta * 3) * 0.15; colors.push(0.33 * colorVar, 0.21 * colorVar, 0.11 * colorVar); } } for (let h = 0; h < heightSegments; h++) { for (let r = 0; r < radialSegments; r++) { const current = h * (radialSegments + 1) + r; const next = current + radialSegments + 1; indices.push(current, next, current + 1); indices.push(current + 1, next, next + 1); } } return { vertices: new Float32Array(vertices), colors: new Float32Array(colors), normals: new Float32Array(normals), indices: new Uint16Array(indices) }; }

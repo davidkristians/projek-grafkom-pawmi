@@ -1,5 +1,3 @@
-// scene/TrunkNode.js
-
 import { group } from "../geometry/group.js";
 
 export class TrunkNode extends group {
@@ -10,7 +8,7 @@ export class TrunkNode extends group {
         this.app = env.globalApp;
         this.buffers = env.buffers;
 
-        // Atur posisi LOKAL batang relatif terhadap TreeGroup
+        // Atur posisi batang lokal relatif terhadap TreeGroup
         LIBS.set_I4(this.POSITION_MATRIX);
         // Posisi Y dasar akan diterapkan di render TreeGroup,
         // jadi di sini kita bisa mulai dari 0 atau atur offset jika perlu

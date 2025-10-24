@@ -1,5 +1,3 @@
-// scene/CanopyNode.js
-
 import { group } from "../geometry/group.js";
 
 export class CanopyNode extends group {
@@ -10,7 +8,7 @@ export class CanopyNode extends group {
         this.app = env.globalApp;
         this.buffers = env.buffers;
 
-        // Atur posisi LOKAL kanopi relatif terhadap TreeGroup
+        // Atur posisi kanopi lokal relatif terhadap TreeGroup
         LIBS.set_I4(this.POSITION_MATRIX);
         // Posisi Y dasar kanopi
         LIBS.translateY(this.POSITION_MATRIX, 0.75 + 1.0); // treeBaseY + 1.0
@@ -36,7 +34,7 @@ export class CanopyNode extends group {
         leafClusters.forEach((offset, oi) => {
             let leafExtraMv = LIBS.get_I4();
             LIBS.mul(leafExtraMv, M, leafExtraMv); // Mulai dari matriks kanopi M
-            // Terapkan offset LOKAL relatif terhadap kanopi
+            // Terapkan offset lokal relatif terhadap kanopi
             LIBS.translateX(leafExtraMv, offset[0]);
             LIBS.translateY(leafExtraMv, offset[1]);
             LIBS.translateZ(leafExtraMv, offset[2]);

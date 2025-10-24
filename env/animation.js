@@ -1,5 +1,3 @@
-// env/animation.js
-
 // Ambil LIBS dari window (masih dibutuhkan untuk CloudSystem jika tidak diubah)
 const LIBS = window.LIBS;
 
@@ -60,8 +58,6 @@ export class AnimationLoop {
                 animateFunc(actor, time, deltaTime);
             } catch (error) {
                 console.error(`Error animating actor:`, actor, error);
-                // Hapus animasi error agar tidak terus mencoba (opsional)
-                // this.actorAnimations.delete(actor);
             }
         }
     }

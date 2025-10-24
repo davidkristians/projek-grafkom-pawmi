@@ -1,13 +1,12 @@
-// geometry/cone.js
 export class cone {
-    // ▼▼▼ DIUBAH: Tambahkan _normal ▼▼▼
     constructor(GL, SHADER_PROGRAM, _position, _color, _Mmatrix, _normal, opts = {}) {
         this.GL = GL; this.SHADER_PROGRAM = SHADER_PROGRAM;
         this._position = _position; this._color = _color; this._MMatrix = _Mmatrix;
-        this._normal = _normal; // BARU
+        this._normal = _normal;
         this.POSITION_MATRIX = LIBS.get_I4(); this.MOVE_MATRIX = LIBS.get_I4(); this.childs = [];
         this._build(opts);
     }
+
     _build(opts) {
         const radiusBottom = opts.radiusBottom ?? 0.2;
         const radiusTop = opts.radiusTop ?? 0.0;
@@ -16,7 +15,7 @@ export class cone {
         const color = opts.color ?? [1,1,1];
         const v = [], idx = []; const x0=0, x1=height; const TWO_PI=Math.PI*2;
 
-        // Kalkulasi Normal Samping
+        // hitung normal samping
         const n_x = height;
         const n_y = radiusBottom - radiusTop;
         const len = Math.sqrt(n_x*n_x + n_y*n_y);
@@ -29,7 +28,6 @@ export class cone {
             const nx = n_x_norm * cA;
             const ny = n_y_norm;
             const nz = n_x_norm * sA;
-            // ▼▼▼ DIUBAH: Tambahkan normal ke vertex array (stride jadi 9) ▼▼▼
             v.push(x1, radiusTop*cA, radiusTop*sA, ...color, nx, ny, nz);
             v.push(x0, radiusBottom*cA, radiusBottom*sA, ...color, nx, ny, nz);
         }
@@ -38,7 +36,6 @@ export class cone {
             idx.push(i0, i0+1, i1, i1, i0+1, i1+1);
         }
         
-        // ▼▼▼ DIUBAH: Alas dengan normal (-1, 0, 0) karena cone dibuat menyamping ▼▼▼
         const baseCenterIdx = v.length/9; // Stride 9
         v.push(x0,0,0, ...color, -1, 0, 0);
         for(let s=0; s<=segments; s++){ 
@@ -59,6 +56,7 @@ export class cone {
         }
         this.vertex=v; this.faces=idx;
     }
+
     setup() {
         this.OBJECT_VERTEX=this.GL.createBuffer(); this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.OBJECT_VERTEX);
         this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array(this.vertex), this.GL.STATIC_DRAW);
@@ -66,6 +64,6 @@ export class cone {
         this.GL.bufferData(this.GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.faces), this.GL.STATIC_DRAW);
         this.childs.forEach(c=>c.setup());
     }
-    // Render() akan di-patch oleh pawmo.js, jadi tidak perlu diubah di sini
-    render(PARENT_MATRIX) { /* ... This will be patched ... */ }
+
+    render(PARENT_MATRIX) {  }
 }

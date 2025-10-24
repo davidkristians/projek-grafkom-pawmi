@@ -1,13 +1,9 @@
-// main-pawmi.js
-
-// 1. IMPOR SEMUA KELAS GEOMETRI PAWMI
-// (Grup)
+// IMPOR SEMUA KELAS GEOMETRI PAWMI
 import { group } from "./geometry/group.js";
 import { pawmoCurvedTorso } from "./geometry/pawmoCurvedTorso.js";
 import { pawmoHead } from "./geometry/pawmo-head.js";
 import { pawmoTail } from "./geometry/pawmo-tail.js";
 import { pawmoEar } from "./geometry/pawmo-ear.js";
-// (Grup dan Daun)
 import { pawmoHand, PawmoArm } from "./geometry/pawmo-hand.js"; // Impor PawmoArm yang sudah di-export
 
 // (Dedaunan / Leaf Nodes)
@@ -33,11 +29,9 @@ function patchRenderPrototype(proto, normMatLoc) {
         this.GL.useProgram(this.SHADER_PROGRAM);
         this.GL.uniformMatrix4fv(this._MMatrix, false, M); // Mengatur uModelViewMatrix
 
-        // ▼▼▼ INI ADALAH PERBAIKAN KITA ▼▼▼
         // Atur uNormalMatrix agar sama dengan uModelViewMatrix,
         // persis seperti yang dilakukan oleh shader Pulau.
         this.GL.uniformMatrix4fv(normMatLoc, false, M);
-        // ▲▲▲ SELESAI ▲▲▲
 
         this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.OBJECT_VERTEX);
 
@@ -54,7 +48,7 @@ function patchRenderPrototype(proto, normMatLoc) {
         this.GL.bindBuffer(this.GL.ELEMENT_ARRAY_BUFFER, this.OBJECT_FACES);
         this.GL.drawElements(this.GL.TRIANGLES, this.faces.length, this.GL.UNSIGNED_SHORT, 0);
 
-        // Cek dulu jika this.childs ada SEBELUM me-looping
+        // Cek dulu jika this.childs ada SEBELUM melooping
         if (this.childs && this.childs.length > 0) {
             this.childs.forEach(c => c.render(M));
         }

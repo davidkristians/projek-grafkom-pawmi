@@ -1,6 +1,4 @@
-// geometry/group.js
 export class group {
-    // ▼▼▼ DIUBAH: Tambahkan _normal (opsional) ▼▼▼
     constructor(_Mmatrix, _normal = null) {
         this._MMatrix = _Mmatrix;
         this._normal = _normal;
@@ -8,7 +6,11 @@ export class group {
         this.MOVE_MATRIX = LIBS.get_I4();
         this.childs = [];
     }
-    setup() { this.childs.forEach(c => c.setup()); }
+
+    setup() {
+        this.childs.forEach(c => c.setup());
+    }
+    
     render(PARENT_MATRIX) {
         const M = LIBS.get_I4();
         LIBS.mul(M, PARENT_MATRIX, this.POSITION_MATRIX);

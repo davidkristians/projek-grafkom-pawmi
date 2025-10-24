@@ -1,5 +1,3 @@
-// scene/RockGroup.js
-
 import { group } from "../geometry/group.js";
 
 export class RockGroup extends group {
@@ -11,7 +9,7 @@ export class RockGroup extends group {
         this.buffers = env.buffers;
         this.rockData = rockData; 
 
-        // Atur posisi LOKAL batu
+        // Atur posisi batu lokal
         LIBS.set_I4(this.POSITION_MATRIX);
         LIBS.translateX(this.POSITION_MATRIX, rockData.pos[0]);
         LIBS.translateY(this.POSITION_MATRIX, 1.08); // Y dasar batu
@@ -24,7 +22,6 @@ export class RockGroup extends group {
         const M = LIBS.get_I4();
         LIBS.mul(M, PARENT_MATRIX, this.POSITION_MATRIX);
 
-        // ▼▼▼ TAMBAHKAN ROTASI DI SINI ▼▼▼
         // Ganti angka 0.5 dengan sudut rotasi yang Anda inginkan (dalam radian)
         // LIBS.degToRad(30) akan memutar 30 derajat
         const angleInRadians = LIBS.degToRad(90); // Contoh: Putar 45 derajat di sumbu Y
@@ -32,10 +29,8 @@ export class RockGroup extends group {
         // Anda juga bisa pakai rotateX atau rotateZ
         LIBS.rotateX(M, LIBS.degToRad(90)); 
         LIBS.rotateZ(M, LIBS.degToRad(120));
-   
-        // ▲▲▲ SELESAI MENAMBAHKAN ROTASI ▲▲▲
 
-        // Terapkan skala LOKAL batu (setelah rotasi)
+        // Terapkan skala batu lokal (setelah rotasi)
         LIBS.scale(M, this.rockData.scale, this.rockData.scale * 0.7, this.rockData.scale);
 
         const gl = this.gl;

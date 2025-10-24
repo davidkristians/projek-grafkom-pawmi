@@ -11,20 +11,19 @@ export class PokeballGroup extends group {
         this.app = env.globalApp;
         this.pokeballData = pokeballData;
 
-        // --- Define Colors ---
+        // --- Inisialisasi warna ---
         const POKEBALL_RED = [0.9, 0.1, 0.1];
         const POKEBALL_WHITE = [0.95, 0.95, 0.95];
         const POKEBALL_BLACK = [0.1, 0.1, 0.1];
         const POKEBALL_BUTTON_WHITE = [0.85, 0.85, 0.85];
 
-        // --- Create Geometry Instances ---
+        // --- Buat instansi geometri ---
         const baseRadius = 0.2 * (this.pokeballData.scale ?? 1.0);
         const bandHeight = baseRadius * 0.15;
         const buttonBaseRadius = baseRadius * 0.35;
         const buttonRingRadius = baseRadius * 0.45;
         const buttonCenterRadius = baseRadius * 0.2;
 
-        // Use this.app for global properties
         const topHemisphere = new hemisphere(this.gl, this.app.mainProgram, this.app.posLoc, this.app.colLoc, this.app.mvLoc, this.app.normLoc, {
             radius: baseRadius, color: POKEBALL_RED, topHalf: true, segments: 24, rings: 12
         });
@@ -44,7 +43,7 @@ export class PokeballGroup extends group {
             rx: buttonCenterRadius, ry: bandHeight * 0.3, rz: buttonCenterRadius, color: POKEBALL_WHITE, segments: 12, rings: 6
         });
 
-        // --- Position Parts ---
+        // --- transformasi posisi ---
         LIBS.rotateX(buttonBase.POSITION_MATRIX, LIBS.degToRad(90));
         LIBS.rotateX(buttonRing.POSITION_MATRIX, LIBS.degToRad(90));
         LIBS.rotateX(buttonCenter.POSITION_MATRIX, LIBS.degToRad(90));
@@ -57,26 +56,20 @@ export class PokeballGroup extends group {
         this.childs.push(topHemisphere, bottomHemisphere, blackBand, buttonRing, buttonBase, buttonCenter);
         this.childs.forEach(c => c.setup());
 
-        // --- Set PokeballGroup's overall position ---
+        // --- Atur keseluruhan posisi pokeballGroup nya  ---
         LIBS.set_I4(this.POSITION_MATRIX);
         LIBS.translateX(this.POSITION_MATRIX, pokeballData.pos[0]);
         LIBS.rotateX(this.POSITION_MATRIX, LIBS.degToRad(-10));
         
-
-        // ▼▼▼ DI SINI PERUBAHANNYA ▼▼▼
-        // Periksa apakah ini bola sebelah kanan (yang memiliki nilai pos[0] positif)
+        // Periksa apakah ini bola sebelah kanan atau bukan (yang memiliki nilai pos[0] positif)
         if (pokeballData.pos[0] > 0) {
-            // Jika ya, gunakan nilai Y yang lebih rendah untuk menurunkannya
+            // Jika ya, pakai nilai Y yang lebih rendah untuk menurunkannya
             LIBS.translateY(this.POSITION_MATRIX, 1.08); // Turunkan sedikit
         } else {
-            // Jika tidak (ini bola sebelah kiri), gunakan posisi Y yang normal
+            // Jika tidak berarto bola sebelah kiri, gunakan posisi Y yang normal
             LIBS.translateY(this.POSITION_MATRIX, 1.2);
         }
-        // ▲▲▲ SELESAI PERUBAHAN ▲▲▲
-
         LIBS.translateZ(this.POSITION_MATRIX, pokeballData.pos[2]);
     }
-
-    // Tidak perlu fungsi render() spesifik, group sudah menanganinya
 }
 
