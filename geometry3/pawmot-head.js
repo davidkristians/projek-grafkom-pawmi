@@ -188,7 +188,7 @@ export class pawmotHead extends group {
             Ear, tuftGroup
         );
 
-        // ▼▼▼ PERBAIKAN: Buat smileRef untuk kompatibilitas animasi ▼▼▼
+        // Buat smileRef untuk kompatibilitas animasi
         this.smileRef = mouthOpen;
         this.tuftRef = tuftGroup;
     }
