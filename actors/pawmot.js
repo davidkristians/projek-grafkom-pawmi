@@ -51,9 +51,9 @@ export function createPawmot(animationLoop) {
     patchRenderPrototype(cone.prototype, _NMatrixLoc);
     patchRenderPrototype(pawmotFoot.prototype, _NMatrixLoc);
     patchRenderPrototype(PawmoArm.prototype, _NMatrixLoc);
-    patchRenderPrototype(pawmotTorso.prototype, _NMatrixLoc); // BARU: Patch Torso
-    patchRenderPrototype(RuffSpike.prototype, _NMatrixLoc); // BARU: Patch RuffSpike
-    patchRenderPrototype(pawmotTuft.prototype, _NMatrixLoc); // <-- BARU: Patch Tuft
+    patchRenderPrototype(pawmotTorso.prototype, _NMatrixLoc); // Patch Torso
+    patchRenderPrototype(RuffSpike.prototype, _NMatrixLoc); // Patch RuffSpike
+    patchRenderPrototype(pawmotTuft.prototype, _NMatrixLoc); // Patch Tuft
 
     // Inisialisasi Warna
     const PAWMOT_ORANGE_LIGHT = [240 / 255, 150 / 255, 50 / 255];
